@@ -1,0 +1,660 @@
+*UltraBlog.txt*
+==============================================================================
+  UltraBlog                                                        *UltraBlog*
+==============================================================================
+
+Author:      Lenin Lee   lenin.lee at gmail dot com       *UltraBlog_Author*
+URL:         http://sinolog.it/?p=1894                    *UltraBlog_URL*
+Description: Ultimate vim blogging plugin.                |UltraBlog_Motivation|
+Version:     3.0.0                                        |UltraBlog_History|
+License:     Copyleft                                     |UltraBlog_License|
+Contribute:  Please report any bugs or suggestions        |UltraBlog_Bugs|
+             to the address above.                        |UltraBlog_Future|
+
+==============================================================================
+  Table of Contents                                        *UltraBlog_Contents*
+==============================================================================
+
+             1. Motivation.................|UltraBlog_Motivation|
+             2. Features...................|UltraBlog_Features|
+             3. Concepts...................|UltraBlog_Concepts|
+                3.1 Modes..................|UltraBlog_Modes|
+                3.2 Items..................|UltraBlog_Items|
+                3.3 Syntaxes...............|UltraBlog_Syntaxes|
+                3.4 Scopes.................|UltraBlog_Scopes|
+                3.5 Status.................|UltraBlog_Statuses|
+             4. Prerequisites..............|UltraBlog_Prerequisites|
+             5. Keymaps....................|UltraBlog_Keymaps|
+             6. Commands...................|UltraBlog_Commands|
+             7. Options....................|UltraBlog_Options|
+             8. Bugs.......................|UltraBlog_Bugs|
+             9. Future.....................|UltraBlog_Future|
+            10. History....................|UltraBlog_History|
+            11. License....................|UltraBlog_License|
+
+==============================================================================
+  Motivation                                             *UltraBlog_Motivation*
+==============================================================================
+
+The biggest difference between UltraBlog.vim and other Vim blogging scripts is 
+that UltraBlog.vim supplies two modes: the first one is editor mode, in which 
+users can manage posts and pages in their blogs, just like other Vim blogging
+scripts; the second is client mode, in which posts and pages are stored in a 
+local SQLite database, in this way, it does not only OPERATE on posts/pages in 
+blogs but also MANAGE them locally. So UltraBlog.vim is an integrated blogging 
+client more than just a blog editor.
+
+You will find UltraBlog.vim very useful when you write posts in some light 
+weight markup languages, such as Markdown, LaTeX, reStructuredText and Textile. 
+With posts/pages stored locally, you can edit them in any light weight markup
+language at any time even after a long time when they were published, and update 
+the online copies in HTML syntax. 
+
+This is the exact original intention for which I wrote UltraBlog.vim. After 
+years of blogging, I've formed the habbit of writing posts in Markdown 
+syntax to save time, and I think it is good to always keep my posts updated, 
+rather than post it and forget it. But I found it hard to update the posted 
+copies after modifying the local Markdown source files with other Vim blogging 
+plugins except UltraBlog.vim.
+
+==============================================================================
+  Features                                                 *UltraBlog_Features*
+==============================================================================
+
+    * Event-driven system.
+    * Multiple syntax support: Markdown, HTML, reStructuredText, LaTeX,
+      Textile.
+    * Editor mode and client mode.
+    * Data is stored in a local SQLite database in client mode.
+    * Context search with keywords highlighting.
+    * Templates for previewing posts.
+
+==============================================================================
+  Concepts                                                 *UltraBlog_Concepts*
+==============================================================================
+
+UltraBlog.vim makes life easier while writing or updating blogs. It stores
+posts/pages in a local SQLite database. You can also set it to editor mode, in
+which UltraBlog.vim does not store data locally, just like other Vim blogging 
+scripts.
+
+------------------------------------------------------------------------------
+
+By default, UltraBlog.vim is in client mode. You can set it to use editor mode
+by adding the fallowing line to the vimrc file:
+
+  Modes                                                       *UltraBlog_Modes*
+
+    let ub_editor_mode = 1
+
+------------------------------------------------------------------------------
+
+  Items                                                       *UltraBlog_Items*
+
+Currently, UltraBlog.vim manages three items: post, page and tmpl. "tmpl" 
+is the shorthand of "template".
+
+                                                           *UltraBlog_Template*
+
+Templates are used to preview the current post/page in the browser locally.
+This feature is a reparation for the remote previewing, due to the limit of
+the API, users cannot send a post to Wordpress as draft and preview it without
+affecting the post status if the post has been published.
+
+With templates, users can preview posts/pages directly in the browser in a 
+pre-defined style. They can create as many templates as they like and
+customize the look with CSS and HTML, or even Javascript.
+
+Templates should be formatted as a valid python template string, that is, use
+the following avaliable placeholders and escape any literal '%' with another 
+'%':
+
+    %(title)s
+        The title of the current post/page.
+
+    %(content)s
+        The content of the current post/page.
+
+    %%
+        A literal '%'.
+
+There is a default template in the database, whose name is 'default', which
+can be used as an example of template.
+
+Users can specify the default template to use with the option
+|ub_default_template|.
+
+------------------------------------------------------------------------------
+
+  Syntaxes                                                 *UltraBlog_Syntaxes*
+
+The syntaxes supported by UltraBlog.vim currently are:
+
+    markdown, html, rst, textile, latex.
+
+------------------------------------------------------------------------------
+
+  Statuses                                                 *UltraBlog_Statuses*
+
+The available statuses are:
+
+    publish, private, draft, pending.
+
+------------------------------------------------------------------------------
+
+  Scopes                                                     *UltraBlog_Scopes*
+
+Scopes tells UltraBlog.vim to operate on items in which place, "local" stands 
+for items stored in the database, and "remote" stands for the blog.
+
+==============================================================================
+  Prerequisites                                       *UltraBlog_Prerequisites*
+==============================================================================
+
+UltraBlog.vim requires the following softwares to work normally:
+
+    * Vim with python support enabled
+    * SQLAlchemy 0.7 or newer
+    + python-markdown or python-markdown2
+    + pandoc or other
+
+The asterisk items are required at any condition.
+
+One of the two markdown modules of python is needed if you want to convert 
+posts/pages from Markdown to HTML.
+
+pandoc is requried when you need to do conversions between any pair of the 
+avaliable syntaxes. You can also specify you own external command as the 
+converter. For more information, refer to help messages of options below.
+
+==============================================================================
+  Keymappings                                           *UltraBlog_Keymappings*
+==============================================================================
+
+All keymappings can be customized by setting some options, refer to
+|UltraBlog_Options| for detail information.
+
+<c-pageup>    - Shift to previous page in local post list.
+<c-pagedown>  - Shift to next page in local post list.
+<del>         - Delete the post under cursor in post list.
+<enter>       - Open the post/page under cursor in the current view, if is in 
+                remote post list, posts which are not in local database will 
+                be saved to it before opened.
+<s-enter>     - Open the post/page under cursor in a new splitted window.
+<c-enter>     - Open the post/page under cursor in a new tab.
+
+==============================================================================
+  Commands                                                 *UltraBlog_Commands*
+==============================================================================
+
+:UBNew [item [syntax/template_name]]                                   *:UBNew*
+    Create a new item.
+
+    For the first parameter, refer to |UltraBlog_Items|. The default value is
+    "post".
+
+    If "item" is either "post" or "page", the second parameter must be a syntax 
+    name, refer to |UltraBlog_Syntaxes|. The default value is "markdown".
+
+    If "item" is "tmpl", the second parameter should be the name of the new 
+    template.
+
+:UBPreview [status/template name]                                  *:UBPreview*
+    Preview the current buffer.
+
+    If any of the |UltraBlog_Statuses| is given, the current buffer will be sent
+    to the blog and then opened in the browser with a parameter "preview" 
+    appended to the URL.
+
+    If the given parameter is not a post status, a pre-defined template whose
+    name is the same with the parameter will be used to preview the buffer
+    locally.
+
+    If none is given, the default template is used.
+    
+    You do not have to care for which syntax you use, markdown source will be 
+    translated into html automatically before a browser window is opened to 
+    display it.
+
+:UBSave                                                               *:UBSave*
+    Save modifications. After executing this command, the current buffer is 
+    saved into database.
+
+:UBSend [status]                                                      *:UBSend*
+    Post an item. If no parameter is given, UltraBlog.vim will send the item 
+    to blog and set it to be the value stored in the meta information area.
+
+    Refer to |UltraBlog_Statuses|.
+
+:UBList [item [scope [page_size [page_no]]]]                          *:UBList*
+    List items.
+
+    Refer to |UltraBlog_Items| for the first parameter. The default value of 
+    this parameter is "post".
+
+    The second parameter "scope" is only available when "item" is either 
+    "post" or "page". Refer to |UltraBlog_Scopes|.
+
+    "page_size" and "page_no" are both for the situation when "item" is 
+    "post" and "scope" is "local". The former stands for how many item will 
+    be listed a page. The latter stands for the page number.
+
+    For example:
+
+    :UBList
+
+    This command lists the first page of local posts, by default, posts which 
+    have not been posted to blog are listed before the posted ones, and there 
+    are |ub_local_pagesize| posts a page.
+
+    :UBList post local 20 3
+
+    This command lists the third page of local posts, 20 posts a page. As you 
+    see, you can use this command to scroll forward or back between pages. As 
+    a matter of fact, there are two key mappings within local post list:
+
+      * CTRL+PageDown
+      * CTRL+PageUp
+
+    :UBList post remote 50
+
+    This command lists the latest 50 posts in the blog.
+
+    Pressing the ENTER key in a remote post list will open the post under 
+    cursor and save it to the local database if it is not in it, otherwise, 
+    the local copy will be opened instead of the remote one. This enables 
+    users to modify markdown source and update the remote post.
+
+    The remote post list doesn't support paging.
+
+:UBOpen {item} {post_id/template_name} [scope]                        *:UBOpen*
+    Open an item. 
+
+    For the first parameter, refer to |UltraBlog_Items|.
+
+    If "item" is either "post" or "page", the second parameter should be value
+    of its id. If it's "tmpl", the name.
+
+    For "scope", refer to |UltraBlog_Scopes|. The default value is "local".
+
+:UBDel {item} {post_id/template_name} [scope]                          *:UBDel*
+    Delete an item.
+    
+    Refer to |UBOpen| for the usage of these options.
+
+    You can also delete items in the list by pressing the DELETE button on 
+    the target. In a local post list, if the post to be deleted has been 
+    posted to the blog, a confirmation will be prompted for you to decide 
+    whether to delete the remote copy cascadly.
+
+:UBUpload {file_path}                                               *:UBUpload*
+    Upload media. This command can only be executed in a post edit view, and 
+    the URL of the uploaed file will be appended in that buffer.
+
+:UBThis [item [syntax]]                                               *:UBThis*
+    Create a new post or page which is filled with content in the current 
+    buffer. 
+    
+    If no parameter is specified, the first parameter will be default to "post".
+    For the second one, the syntax in the current buffer is used, if no syntax 
+    has been set to the current buffer, then "markdown" is used.
+
+:UBConv {to_syntax} [from_syntax]                                     *:UBConv*
+    Convert the current buffer from 'from_syntax' to 'to_syntax'.
+
+    Refer to |UltraBlog_Syntaxes|.
+
+    If you only need to convert from Markdown to HTML, only python-markdown or
+    python-markdown2 module is required. For other conversion scenarios, you 
+    must install pacdoc or use the options: |ub_converter_command|, 
+    |ub_converter_options|, |ub_converter_option_from|,
+    |ub_converter_option_to| to specify a valid external command.
+
+:UBRefresh                                                         *:UBRefresh*
+    Refresh the current buffer.
+
+:UBFind keyword1 [keyword2 ...]                                       *:UBFind*
+    Context search for both posts and pages, all keywords will be highlighted.
+    Page size of the search result list is controlled by |ub_search_pagesize|.
+
+==============================================================================
+  Options                                                   *UltraBlog_Options*
+==============================================================================
+
+ub_blog                                                               *ub_blog*
+
+    Example:
+        let ub_blog = {'login_name':'admin',
+                    \'password':'pass2011',
+                    \'xmlrpc':'http://www.sample.com/xmlrpc.php',
+                    \'db':'$VIM/UltraBlog.db'
+                    \}
+    Keys:
+        db
+            Use any path string that can be expanded as a normal fullpath by
+            the function 'expand()'.
+
+------------------------------------------------------------------------------
+
+ub_editor_mode                                                 *ub_editor_mode*
+
+    Set this option to 1 will force UltraBlog.vim not to store data in a local
+    SQLite database. You can still use most of the functions UltraBlog.vim
+    supplies, especially those which are used to manage blogs remotely.
+    
+    In one word, this mode works just like other Vim blogging scripts.
+
+------------------------------------------------------------------------------
+
+ub_local_pagesize                                           *ub_local_pagesize*
+
+    Default pagesize for local post list. If not specified, the default value
+    is 30.
+
+------------------------------------------------------------------------------
+
+ub_remote_pagesize                                         *ub_remote_pagesize*
+
+    Default pagesize for remote post list. If not specified, the default value
+    is 10.
+
+------------------------------------------------------------------------------
+
+ub_search_pagesize                                         *ub_search_pagesize*
+
+    Default pagesize for search result list. If not specified, the default 
+    value is 30.
+
+------------------------------------------------------------------------------
+
+ub_append_promotion_link                             *ub_append_promotion_link*
+
+    If this option has been set to 1, a promotion link will be appended at the
+    end of current buffer after |:UBNew| is executed.
+
+    Proudly show your visitors that you are blogging with the world's most 
+    powerful editor.
+
+------------------------------------------------------------------------------
+
+ub_list_col1_width                                         *ub_list_col1_width*
+ub_list_col2_width                                         *ub_list_col2_width*
+ub_list_col3_width                                         *ub_list_col3_width*
+
+    Column widths of post or page lists.
+    col1 for the local id column, whose default value is 10.
+    col2 for the remote id column, whose default value is 10.
+    col3 for the status column, whose default value is 10.
+
+------------------------------------------------------------------------------
+
+ub_save_after_opend                                      *ub_save_after_opened*
+ub_save_after_sent                                         *ub_save_after_sent*
+
+    If the above options are set to 1, posts/pages will be saved to database
+    immediately after they are opened from or sent to the blog.
+
+    By default, their values are 0s.
+
+------------------------------------------------------------------------------
+
+ub_converter_command                                     *ub_converter_command*
+
+    This is the command needed to do conversions between the avaliable
+    syntaxes.
+
+    By default, the value is:
+
+        'pandoc'
+
+------------------------------------------------------------------------------
+
+ub_converter_options                                     *ub_converter_options*
+
+    A list of options to be appended to the |ub_converter_command|.
+
+    By default, the value is:
+
+        ['--reference-links']
+
+------------------------------------------------------------------------------
+
+ub_converter_option_from                             *ub_converter_option_from*
+
+    A template string which will be filled with the 'from_syntax' and appended
+    to the |ub_converter_command|.
+
+    By default, the value is:
+
+        '--from=%s'
+
+------------------------------------------------------------------------------
+
+ub_converter_option_to                                 *ub_converter_option_to*
+
+    A template string which will be filled with the 'to_syntax' and appended
+    to the |ub_converter_command|.
+
+    By default, the value is:
+
+        '--to=%s'
+
+------------------------------------------------------------------------------
+
+ub_hotkey_open_item_in_current_view       *ub_hotkey_open_item_in_current_view*
+
+    Set the hotkey to be used when to open a post/page in the list view. When
+    invoked, the list view will be reused.
+
+    By default, the value is:
+
+    let ub_hotkey_open_item_in_current_view='<enter>'
+
+------------------------------------------------------------------------------
+
+ub_hotkey_open_item_in_splitted_view     *ub_hotkey_open_item_in_splitted_view*
+
+    Set the hotkey to be used when to open a post/page in the list view. When
+    invoked, the post/page will be displayed in a new splitted window.
+
+    By default, the value is:
+
+    let ub_hotkey_open_item_in_splitted_view='<s-enter>'
+
+------------------------------------------------------------------------------
+
+ub_hotkey_open_item_in_tabbed_view         *ub_hotkey_open_item_in_tabbed_view*
+
+    Set the hotkey to be used when to open a post/page in the list view. When
+    invoked, the post/page will be displayed in a new tab.
+
+    By default, the value is:
+
+    let ub_hotkey_open_item_in_tabbed_view='<c-enter>'
+
+------------------------------------------------------------------------------
+
+ub_hotkey_delete_item                                   *ub_hotkey_delete_item*
+
+    Set the hotkey to be used when to delete a post/page in the list view. 
+    When invoked, the post/page will be deleted after a confirmation.
+
+    By default, the value is:
+
+    let ub_hotkey_delete_item='<del>'
+
+------------------------------------------------------------------------------
+
+ub_tmpl_img_url                                               *ub_tmpl_img_url*
+
+    Set the link template for images uploaded by |:UBUpload|. This string 
+    should be a template string valid for python to format printing, and every
+    placeholder must be among the keys of the dictionary returned by the
+    wordpress API method newMediaObject().
+
+    Structure of the dictionary:
+
+        {'url':'http://xxx/z.jpg', 'file':'z.jpg', 'type':'image/x-jpg'}
+
+    By default, the value is:
+        
+        let ub_tmpl_img_url="markdown###![%(file)s][]\n[%(file)s]:%(url)s"
+
+    As is illustrated, the template string should be appended with its syntax.
+    A tripple sharp sign '###' is used to devide the syntax and the template.
+    This is used to auto convert the template to the syntax the current buffer
+    has. If you don't need this, you can just simply ignore the appending
+    syntax and '###'.
+
+------------------------------------------------------------------------------
+
+ub_default_template                                       *ub_default_template*
+
+    Set the default template to be used to preview the current buffer in the 
+    browser.
+
+    By default, the value is:
+
+    let ub_default_template="default"
+
+==============================================================================
+  Future                                                     *UltraBlog_Future*
+==============================================================================
+
+    * The future of UltraBlog.vim depends on you, send me your advices.
+    * Write a syntax file for this script.
+
+==============================================================================
+  Bugs                                                         *UltraBlog_Bugs*
+==============================================================================
+
+If you discover any bugs not listed here, please contact the |UltraBlog_Author|
+
+==============================================================================
+  History                                                   *UltraBlog_History*
+==============================================================================
+
+3.0.0
+    * Feature: Mostly rewritten for implementing an event-driven system.
+    * Feature: Context search comes with keywords highlighting. A new command
+               |:UBFind| and a new option |ub_search_pagesize|.
+    * Feature: Refresh every buffer with the new command |:UBRefresh|.
+    * Bugfix:  Some.
+
+2.3.1
+    * Bugfix:  Listing remote posts will complain the error: local variable 
+               'page_no' referenced before assignment.
+    * Bugfix:  The editing window will be set as modified after being sent to
+               blog when |ub_save_after_sent| is 0 and the buffer was in 
+               unmodified status.
+
+2.3.0
+    * Feature: Preview posts/pages locally with pre-defined templates,
+               template related operations and management.
+    * Feature: Preview posts/pages after sending them to the blog.
+    * Change:  Merge :UBPageNew to |:UBNew|, merge :UBPageOpen to |:UBOpen|, 
+               merge :UBPageList to |:UBList|, merge :UBPageThis to |:UBThis|.
+    * Bugfix:  The remote page list will raise an error when openned due to a
+               change made in last version.
+    * Bugfix:  The post/page list will raise an error when an item is deleted
+               in it, caused by a change made in last version.
+
+2.2.0
+    * Change:  Merge :UBSave and :UBPageSave to |:UBSave|, merge :UBSend and 
+               :UBPageSend to |:UBSend|.
+    * Feature: Add an option |ub_tmpl_img_url| to customize a link template 
+               string for the image uploaded by |:UBUpload|.
+
+2.1.0
+    * Change:  Increase the requirement to SQLAlchemy to version 0.7 or newer.
+    * Feature: Now posts/pages can be opened in a new tab or splitted window.
+    * Feature: Add options to let users customize hotkeys:
+                   |ub_hotkey_open_item_in_current_view|
+                   |ub_hotkey_open_item_in_splitted_view|
+                   |ub_hotkey_open_item_in_tabbed_view|
+                   |ub_hotkey_delete_item|
+
+2.0.1
+    * Bugfix:  Uploading media files may fail on Windows.
+    * Bugfix:  An exception may be raised when Vim starts with no proper 
+               configuration for UltraBlog.vim or some prerequisites are not
+               met.
+
+2.0
+    * Feature: Add editor mode.
+    * Feature: Add more syntaxes: LaTeX, reStructuredText and Textile.
+    * Feature: Add command |:UBConv| to convert a post/page from one syntax to
+               another.
+    * Feature: Add options |ub_converter_command|, |ub_converter_options|, 
+               |ub_converter_option_from|, |ub_converter_option_to| to specify 
+               a custom extenal command in place of pandoc as the converter.
+    * Feature: Add option |ub_save_after_opened| to control whether to save 
+               posts/pages to database right after they are fetched from
+               blogs.
+    * Feature: Add option |ub_save_after_sent| to control whether to save
+               posts/pages to database right after they are sent to blogs.
+
+1.4
+    * Feature: Add two commands: |:UBThis| and :UBPageThis, to create a new post 
+               or page with content in the current buffer.
+
+1.3
+    * Feature: Record post statuses, post them in their recorded statuses when 
+               omit parameters for |:UBSend| and :UBPageSend.
+    * Feature: Display post/page status in post/page list, add an option 
+               |ub_list_col3_width| to set its width.
+    * Feature: Extend statuses to support private, pending and draft.
+    * Feature: Change the status 'public' to 'publish'.
+    * Feature: Check prerequesites in every top level functions.
+    * BugFix:  Do not raise an error on startup when sqlalchemy is not installed.
+
+1.2
+    * Feature: Column widths can be set to custom values, which keep post or 
+               page lists tidy. Two options added: |ub_list_col1_width| and 
+               |ub_list_col2_width|.
+
+1.1
+    * Feature: Page management.
+    * Feature: Add option |ub_append_promotion_link| to control whether to
+               append a promotion link of UltraBlog.vim.
+    * Bugfix:  Wrong order for parameters of commands |:UBOpen| and |:UBDel|
+               in documentation.
+
+1.0.5
+    * Feature: Add documentation.
+    * Feature: Use Vimball as the default distribution format.
+    * Feature: Add two options - |ub_local_pagesize| and |ub_remote_pagesize|.
+
+1.0.4
+    * Fix the problem that an unexpected type exception is raised when UBList 
+      is given some numbers as parameters.
+
+1.0.3
+    * Add a column in remote post list the same as the one in local post list, 
+      which is used to display ids of local copies of corresponding posts.
+    * Fix the problem that buffers can be reverted to what the previous views 
+      contain throught the undo action.
+    * Fix the minor problem that text won't wrap automatically in views opened 
+      by the command :UBNew.
+
+1.0.2
+    * Fix the problem that Post.post_id won't be updated in database after a 
+      new post is sent to blog.
+    * Fix the problem that it prompts for confirmation to delete the remote copy 
+      when deleting a post whose post_id is 0 from local post list.
+
+1.0.1
+    * Do not pop up an exception alert for the first time when Vim starts with 
+      UltraBlog.vim installed and no configurations added to the vimrc file.
+
+1.0
+    * Initial version
+
+==============================================================================
+  License                                                   *UltraBlog_License*
+==============================================================================
+
+Copyleft 2011
+
+==============================================================================
+vim:tw=78:ts=4:ft=help:norl:fdm=marker
