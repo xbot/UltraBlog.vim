@@ -24,7 +24,7 @@ Features
 Tips
 --------
 
-* [Enable Code Snippet Highlighting For UltraBlog.vim Templates]{http://sinolog.it/?p=2103}
+* [Enable Code Snippet Highlighting For UltraBlog.vim Templates](http://sinolog.it/?p=2103)
 
 Bug tracker
 --------
