@@ -1,0 +1,48 @@
+UltraBlog.vim
+=============
+
+UltraBlog.vim is yet another Vim blogging script for Wordpress.
+
+The biggest difference between UB and other similar scripts is that UB is an ultimate client, which stores posts locally in an SQLite database, while others just operate remotely. In this way, many things can be done easily by the advantage of local storage and many other utilities, for example, you can search for posts stored in the database with a few keywords by typing a simple command, also you can preview drafts with any of your favorite templates as soon as you want to.
+
+For those who just needs a lightweight blog editor similar as other Vim blogging scripts, UB also comes with an Editor Mode, which doesn't create a database and store data in it.
+
+In addition, UB is tending to make life easy for writing posts with many kinds of lightweight markup languages, currently the following kinds are supported: Markdown, reStructuredText, LaTeX, Textile and of cause HTML.
+
+Enjoy Vim blogging !
+
+Features
+--------
+
+* Event-driven system.
+* Multiple syntax support: Markdown, HTML, reStructuredText, LaTeX, Textile.
+* Editor mode and client mode.
+* Data is stored in a local SQLite database in client mode.
+* Context search with keywords highlighting.
+* Templates for previewing posts.
+
+Tips
+--------
+
+* [Enable Code Snippet Highlighting For UltraBlog.vim Templates][http://sinolog.it/?p=2103]
+
+Bug tracker
+--------
+
+Have a bug? Please create an issue here on GitHub!
+
+https://github.com/xbot/UltraBlog.vim/issues
+
+Author
+--------
+
+**Lenin Lee**
+
+* http://sinolog.it
+* https://twitter.com/leninlee
+* https://github.com/xbot
+
+License
+--------
+
+Licensed under the New BSD License.
