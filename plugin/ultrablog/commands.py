@@ -14,7 +14,7 @@ def __ub_exception_handler(func):
         except UBException, e:
             sys.stderr.write(str(e))
         except xmlrpclib.Fault, e:
-            sys.stderr.write("xmlrpc error: %s" % e.faultString.encode("utf-8"))
+            sys.stderr.write("xmlrpc error: %s" % e.faultString)
         except xmlrpclib.ProtocolError, e:
             sys.stderr.write("xmlrpc error: %s %s" % (e.url, e.errmsg))
         except IOError, e:
@@ -1127,6 +1127,9 @@ class UBCmdOpen(UBCommand):
         self.scope = scope
         self.viewType = viewType
         self.sess = Session()
+        self.saveIt = ub_get_option('ub_save_after_opened', True)
+        self.metaData = None
+        self.item = None
 
         tmp = type(self.itemKey)
         if tmp is types.IntType: pass
@@ -1149,170 +1152,125 @@ class UBCmdOpen(UBCommand):
             else:
                 self.__openRemotePage()
 
+    def _postExec(self):
+        UBCmdOpen.doDefault()
+
+        ub_wise_open_view('%s_edit' % self.itemType, self.viewType)
+        ub_fill_meta_data(self.metaData)
+        vim.current.buffer.append(self.item.content.encode(self.enc).split("\n"))
+
+        vim.command('setl filetype=%s' % self.item.syntax)
+        vim.command('setl wrap')
+        vim.command('call UBClearUndo()')
+        if ub_is_id(self.item.id): vim.command('setl nomodified')
+        vim.current.window.cursor = (len(self.metaData)+3, 0)
+
     def __openLocalPost(self):
         '''Open local post
         '''
-        post = self.sess.query(Post).filter(Post.id==self.itemKey).first()
-        if post is None: raise UBException('No post found !')
+        self.item = self.sess.query(Post).filter(Post.id==self.itemKey).first()
+        if self.item is None: raise UBException('No post found !')
 
-        post_id = post.post_id
-        if post_id is None:
-            post_id = 0
+        post_id = self.item.post_id
+        if post_id is None: post_id = 0
 
-        post_meta_data = dict(\
-                id = post.id,
+        self.metaData = dict(\
+                id = self.item.id,
                 post_id = post_id,
-                title = post.title.encode(self.enc),
-                categories = post.categories.encode(self.enc),
-                tags = post.tags.encode(self.enc),
-                slug = post.slug.encode(self.enc),
-                status = post.status.encode(self.enc))
-
-        ub_wise_open_view('post_edit', self.viewType)
-        ub_fill_meta_data(post_meta_data)
-        vim.current.buffer.append(post.content.encode(self.enc).split("\n"))
-
-        vim.command('setl filetype=%s' % post.syntax)
-        vim.command('setl wrap')
-        vim.command('call UBClearUndo()')
-        vim.command('setl nomodified')
-        vim.current.window.cursor = (len(post_meta_data)+3, 0)
+                title = self.item.title.encode(self.enc),
+                categories = self.item.categories.encode(self.enc),
+                tags = self.item.tags.encode(self.enc),
+                slug = self.item.slug.encode(self.enc),
+                status = self.item.status.encode(self.enc))
 
     def __openLocalPage(self):
         '''Open local page
         '''
-        page = self.sess.query(Post).filter(Post.id==self.itemKey).filter(Post.type=='page').first()
-        if page is None: raise UBException('No page found !')
+        self.item = self.sess.query(Post).filter(Post.id==self.itemKey).filter(Post.type=='page').first()
+        if self.item is None: raise UBException('No page found !')
 
-        post_id = page.post_id
-        if post_id is None:
-            post_id = 0
+        post_id = self.item.post_id
+        if post_id is None: post_id = 0
 
-        page_meta_data = dict(\
-                id = page.id,
+        self.metaData = dict(\
+                id = self.item.id,
                 post_id = post_id,
-                title = page.title.encode(self.enc),
-                slug = page.slug.encode(self.enc),
-                status = page.status.encode(self.enc))
-
-        ub_wise_open_view('page_edit', self.viewType)
-        ub_fill_meta_data(page_meta_data)
-        vim.current.buffer.append(page.content.encode(self.enc).split("\n"))
-
-        vim.command('setl filetype=%s' % page.syntax)
-        vim.command('setl wrap')
-        vim.command('call UBClearUndo()')
-        vim.command('setl nomodified')
-        vim.current.window.cursor = (len(page_meta_data)+3, 0)
+                title = self.item.title.encode(self.enc),
+                slug = self.item.slug.encode(self.enc),
+                status = self.item.status.encode(self.enc))
 
     def __openRemotePost(self):
         '''Open remote post
         '''
-        post = self.sess.query(Post).filter(Post.post_id==self.itemKey).first()
-        saveit = None
+        self.item = self.sess.query(Post).filter(Post.post_id==self.itemKey).first()
 
         # Fetch the remote post if there is not a local copy
-        if post is None:
+        if self.item is None:
             remote_post = api.metaWeblog.getPost(self.itemKey, cfg.loginName, cfg.password)
-            post = Post()
-            post.post_id = self.itemKey
-            post.title = remote_post['title']
-            post.content = remote_post['description']
-            post.categories = ', '.join(remote_post['categories'])
-            post.tags = remote_post['mt_keywords']
-            post.slug = remote_post['wp_slug']
-            post.status = remote_post['post_status']
-            post.syntax = 'html'
+            self.item = Post()
+            self.item.post_id = self.itemKey
+            self.item.title = remote_post['title']
+            self.item.content = remote_post['description']
+            self.item.categories = ', '.join(remote_post['categories'])
+            self.item.tags = remote_post['mt_keywords']
+            self.item.slug = remote_post['wp_slug']
+            self.item.status = remote_post['post_status']
+            self.item.syntax = 'html'
 
-            saveit = ub_get_option('ub_save_after_opened', True)
-            if saveit is True:
-                self.sess.add(post)
+            if self.saveIt is True:
+                self.sess.add(self.item)
                 self.sess.commit()
 
-        id = post.id
-        if post.id is None: id = 0
-        post_meta_data = dict(\
+        id = self.item.id
+        if self.item.id is None: id = 0
+        self.metaData = dict(\
                 id = id,
-                post_id = post.post_id,
-                title = post.title.encode(self.enc),
-                categories = post.categories.encode(self.enc),
-                tags = post.tags.encode(self.enc),
-                slug = post.slug.encode(self.enc),
-                status = post.status.encode(self.enc))
-
-        ub_wise_open_view('post_edit', self.viewType)
-        ub_fill_meta_data(post_meta_data)
-        vim.current.buffer.append(post.content.encode(self.enc).split("\n"))
-
-        vim.command('setl filetype=%s' % post.syntax)
-        vim.command('setl wrap')
-        vim.command('call UBClearUndo()')
-        if saveit is not False:
-            vim.command('setl nomodified')
-        vim.current.window.cursor = (len(post_meta_data)+3, 0)
+                post_id = self.item.post_id,
+                title = self.item.title.encode(self.enc),
+                categories = self.item.categories.encode(self.enc),
+                tags = self.item.tags.encode(self.enc),
+                slug = self.item.slug.encode(self.enc),
+                status = self.item.status.encode(self.enc))
 
     def __openRemotePage(self):
         '''Open remote page
         '''
-        page = self.sess.query(Post).filter(Post.post_id==self.itemKey).filter(Post.type=='page').first()
-        saveit = None
+        self.item = self.sess.query(Post).filter(Post.post_id==self.itemKey).filter(Post.type=='page').first()
 
         # Fetch the remote page if there is not a local copy
-        if page is None:
+        if self.item is None:
             remote_page = api.wp.getPage('', self.itemKey, cfg.loginName, cfg.password)
-            page = Post()
-            page.type = 'page'
-            page.post_id = self.itemKey
-            page.title = remote_page['title']
-            page.content = remote_page['description']
-            page.slug = remote_page['wp_slug']
-            page.status = remote_page['page_status']
-            page.syntax = 'html'
+            self.item = Post()
+            self.item.type = 'page'
+            self.item.post_id = self.itemKey
+            self.item.title = remote_page['title']
+            self.item.content = remote_page['description']
+            self.item.slug = remote_page['wp_slug']
+            self.item.status = remote_page['page_status']
+            self.item.syntax = 'html'
 
-            saveit = ub_get_option('ub_save_after_opened', True)
-            if saveit is True:
-                self.sess.add(page)
+            if self.saveIt is True:
+                self.sess.add(self.item)
                 self.sess.commit()
 
-        id = page.id
-        if page.id is None: id = 0
-        page_meta_data = dict(\
+        id = self.item.id
+        if id is None: id = 0
+        self.metaData = dict(\
                 id = id,
-                post_id = page.post_id,
-                title = page.title.encode(self.enc),
-                slug = page.slug.encode(self.enc),
-                status = page.status.encode(self.enc))
-
-        ub_wise_open_view('page_edit', self.viewType)
-        ub_fill_meta_data(page_meta_data)
-        vim.current.buffer.append(page.content.encode(self.enc).split("\n"))
-
-        vim.command('setl filetype=%s' % page.syntax)
-        vim.command('setl wrap')
-        vim.command('call UBClearUndo()')
-        if saveit is not False:
-            vim.command('setl nomodified')
-        vim.current.window.cursor = (len(page_meta_data)+3, 0)
+                post_id = self.item.post_id,
+                title = self.item.title.encode(self.enc),
+                slug = self.item.slug.encode(self.enc),
+                status = self.item.status.encode(self.enc))
 
     def __openLocalTmpl(self):
         '''Open template
         '''
-        tmpl = self.sess.query(Template).filter(Template.name==self.itemKey).first()
-        if tmpl is None: raise UBException('No template found !')
+        self.item = self.sess.query(Template).filter(Template.name==self.itemKey).first()
+        if self.item is None: raise UBException('No template found !')
 
-        meta_data = dict(\
-                name = tmpl.name.encode(self.enc),
-                description = tmpl.description.encode(self.enc))
-
-        ub_wise_open_view('tmpl_edit', self.viewType)
-        ub_fill_meta_data(meta_data)
-        vim.current.buffer.append(tmpl.content.encode(self.enc).split("\n"))
-
-        vim.command('setl filetype=html')
-        vim.command('setl nowrap')
-        vim.command('call UBClearUndo()')
-        vim.command('setl nomodified')
-        vim.current.window.cursor = (len(meta_data)+3, 0)
+        self.metaData = dict(\
+                name = self.item.name.encode(self.enc),
+                description = self.item.description.encode(self.enc))
 
 def ub_get_templates(name_only=False):
     ''' Fetch and return a list of templates
