@@ -240,23 +240,35 @@ def __ub_exception_handler(func):
 def __ub_list_open_item(view_type=None):
     '''Open the item under cursor, invoked in post or page list
     '''
+    itemKey = None
+    itemType = None
+    scope = 'local'
+
     parts = vim.current.line.split()
     if ub_is_cursorline_valid('template'):
-        ub_open_local_tmpl(parts[0], view_type)
+        itemKey = parts[0]
+        itemType = 'tmpl'
     elif ub_is_cursorline_valid('general'):
         if ub_is_view('local_post_list') or ub_is_view('local_page_list') or ub_is_view('search_result_list'):
             id = int(parts[0])
             sess = Session()
             post = sess.query(Post).filter(Post.id==id).first()
-            eval("ub_open_local_%s(%d, '%s')" % (post.type,id,view_type))
+            itemKey = id
+            itemType = post.type
+            sess.close()
         elif ub_is_view('remote_post_list'):
-            id = int(parts[1])
-            ub_open_remote_post(id, view_type)
+            itemKey = parts[1]
+            itemType = 'post'
+            scope = 'remote'
         elif ub_is_view('remote_page_list'):
-            id = int(parts[1])
-            ub_open_remote_page(id, view_type)
+            itemKey = parts[1]
+            itemType = 'page'
+            scope = 'remote'
         else:
             raise UBException('Invalid view !')
+
+    cmd = UBCmdOpen(itemKey=itemKey, itemType=itemType, scope=scope, viewType=view_type)
+    cmd.execute()
 
 @__ub_exception_handler
 def __ub_list_del_item():
