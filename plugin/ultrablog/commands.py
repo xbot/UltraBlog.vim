@@ -82,11 +82,11 @@ def ub_refresh_current_view():
                         vim.command('setl modified')
                     else:
                         vim.command('setl nomodified')
-                    sys.stderr.write(str(e))
+                    print >> sys.stderr,str(e)
             else:
                 raise UBException('Key of current buffer cannot be found !')
         else:
-            sys.stderr.write('Not implemented !')
+            print >> sys.stderr,'Not implemented !'
             return
 
 @__ub_exception_handler
@@ -820,7 +820,7 @@ class UBCmdList(UBCommand):
         tmpls = sess.query(Template).all()
 
         if len(tmpls)==0:
-            sys.stderr.write('No template found !')
+            print >> sys.stderr,'No template found !'
             return
 
         ub_wise_open_view('local_tmpl_list')
@@ -1040,7 +1040,7 @@ class UBCmdSend(UBCommand):
         else:
             api.metaWeblog.editPost(post_id, cfg.loginName, cfg.password, self.item, self.publish)
             msg = "%s sent as %s !" % (self.itemType.capitalize(), self.status)
-        sys.stdout.write(msg)
+        print >> sys.stdout,msg
 
         evt = eval("UB%sSendEvent(%s)" % (self.itemType.capitalize(), post_id))
         UBEventQueue.fireEvent(evt)
