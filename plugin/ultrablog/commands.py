@@ -12,15 +12,15 @@ def __ub_exception_handler(func):
         try:
             return func(*args,**kwargs)
         except UBException, e:
-            sys.stderr.write(str(e))
+            print >> sys.stderr,str(e)
         except xmlrpclib.Fault, e:
-            sys.stderr.write("xmlrpc error: %s" % e.faultString)
+            print >> sys.stderr,"xmlrpc error: %s" % e.faultString
         except xmlrpclib.ProtocolError, e:
-            sys.stderr.write("xmlrpc error: %s %s" % (e.url, e.errmsg))
+            print >> sys.stderr,"xmlrpc error: %s %s" % (e.url, e.errmsg)
         except IOError, e:
-            sys.stderr.write("network error: %s" % e)
+            print >> sys.stderr,"network error: %s" % e
         except Exception, e:
-            sys.stderr.write(str(e))
+            print >> sys.stderr,str(e)
     return __check
 
 def __ub_enc_check(func):
@@ -93,44 +93,8 @@ def ub_refresh_current_view():
 def ub_preview(tmpl=None):
     '''Preview the current buffer in a browser
     '''
-    if not ub_is_view('post_edit') and not ub_is_view('page_edit'):
-        raise UBException('Invalid view !')
-
-    prv_url = ''
-    enc = vim.eval('&encoding')
-
-    if tmpl in ['private', 'publish', 'draft']:
-        ub_send_item(tmpl)
-
-        if ub_is_view('page_edit'):
-            prv_url = "%s?pageid=%s&preview=true"
-        else:
-            prv_url = "%s?p=%s&preview=true"
-
-        prv_url = prv_url % (cfg.blogURL, ub_get_meta('post_id'))
-    else:
-        if tmpl is None:
-            tmpl = ub_get_option('ub_default_template')
-
-        sess = Session()
-        template = sess.query(Template).filter(Template.name==tmpl.decode(enc)).first()
-        sess.close()
-        if template is None:
-            raise UBException("Template '%s' is not found !" % tmpl)
-
-        tmpl_str = template.content.encode(enc)
-
-        draft = {}
-        draft['title'] = ub_get_meta('title')
-        draft['content'] = ub_get_html()
-
-        tmpfile = tempfile.mktemp(suffix='.html')
-        fp = open(tmpfile, 'w')
-        fp.write(tmpl_str % draft)
-        fp.close()
-        prv_url = "file://%s" % tmpfile
-
-    webbrowser.open(prv_url)
+    cmd = UBCmdPreview(tmpl)
+    cmd.execute()
 
 @__ub_exception_handler
 def ub_save_item():
@@ -603,7 +567,9 @@ class UBCommand(object):
         ub_set_mode()
         self.scope = 'local'
         self.itemType = None
+        self.viewName = ub_get_viewname('%')
         self.enc = vim.eval('&encoding')
+        self.syntax = vim.eval('&syntax')
 
     def checkPrerequisites(self):
         ''' Check the prerequisites
@@ -947,9 +913,7 @@ class UBCmdSave(UBCommand):
     '''
     def __init__(self):
         UBCommand.__init__(self)
-        self.syntax = vim.eval('&syntax')
         self.sess = Session()
-        self.viewName = ub_get_viewname('%')
         self.item = None
         self.itemKey = None
         self.itemType = self.viewName.split('_')[0]
@@ -1057,7 +1021,6 @@ class UBCmdSend(UBCommand):
         if self.status is None:
             self.status = ub_get_meta('status')
         self.publish = ub_check_status(self.status)
-        self.viewName = ub_get_viewname('%')
         self.itemType = self.viewName.split('_')[0]
         self.item = None
 
@@ -1271,6 +1234,51 @@ class UBCmdOpen(UBCommand):
         self.metaData = dict(\
                 name = self.item.name.encode(self.enc),
                 description = self.item.description.encode(self.enc))
+
+class UBCmdPreview(UBCommand):
+    ''' Preview command
+    '''
+    def __init__(self, tmpl=None):
+        UBCommand.__init__(self)
+        self.tmpl = tmpl
+        if self.tmpl is None:
+            self.tmpl = ub_get_option('ub_default_template')
+
+    def _preExec(self):
+        UBCmdPreview.doDefault()
+        if self.viewName not in ['post_edit', 'page_edit']: raise UBException('Invalid view !')
+
+    def _exec(self):
+        prv_url = ''
+        if self.tmpl in ['private', 'publish', 'draft']:
+            ub_send_item(self.tmpl)
+
+            if ub_is_view('page_edit'):
+                prv_url = "%s?pageid=%s&preview=true"
+            else:
+                prv_url = "%s?p=%s&preview=true"
+
+            prv_url = prv_url % (cfg.blogURL, ub_get_meta('post_id'))
+        else:
+            sess = Session()
+            template = sess.query(Template).filter(Template.name==self.tmpl.decode(self.enc)).first()
+            sess.close()
+            if template is None:
+                raise UBException("Template '%s' is not found !" % self.tmpl)
+
+            tmpl_str = template.content.encode(self.enc)
+
+            draft = {}
+            draft['title'] = ub_get_meta('title')
+            draft['content'] = ub_get_html()
+
+            tmpfile = tempfile.mktemp(suffix='.html')
+            fp = open(tmpfile, 'w')
+            fp.write(tmpl_str % draft)
+            fp.close()
+            prv_url = "file://%s" % tmpfile
+
+        webbrowser.open(prv_url)
 
 def ub_get_templates(name_only=False):
     ''' Fetch and return a list of templates
