@@ -162,7 +162,8 @@ endfunction"}}}
 
 function! UBPreviewCmpl(ArgLead, CmdLine, CursorPos)"{{{
 python <<EOF
-templates = ub_get_templates(True)
+enc = vim.eval('&encoding')
+templates = [tmpl.encode(enc) for tmpl in ub_get_templates(True)]
 vim.command('let b:ub_templates=%s' % str(templates))
 EOF
     let tmpls = ['publish', 'private', 'draft']
@@ -179,18 +180,6 @@ function! UBClearUndo()"{{{
     exe "normal a \<BS>\<Esc>"
     let &undolevels = old_undolevels
     unlet old_undolevels
-endfunction"}}}
-
-" Open the item under cursor in list views
-function! UBOpenItemUnderCursor(viewType)"{{{
-    if s:UBIsView('local_post_list') || s:UBIsView('local_page_list') || s:UBIsView('remote_page_list') || s:UBIsView('remote_post_list') || s:UBIsView('local_tmpl_list') || s:UBIsView('search_result_list')
-        exe 'py __ub_list_open_item("'.a:viewType.'")'
-    endif
-endfunction"}}}
-
-" Check if the current buffer is named with the given name
-function! s:UBIsView(viewName)"{{{
-    return exists('b:ub_view_name') && b:ub_view_name==a:viewName
 endfunction"}}}
 
 " Commands
@@ -225,15 +214,15 @@ def __ub_exception_handler(func):
         try:
             return func(*args,**kwargs)
         except UBException, e:
-            sys.stderr.write(str(e))
+            print >> sys.stderr,str(e)
         except xmlrpclib.Fault, e:
-            sys.stderr.write("xmlrpc error: %s" % e.faultString.encode("utf-8"))
+            print >> sys.stderr,"xmlrpc error: %s" % e.faultString.encode("utf-8")
         except xmlrpclib.ProtocolError, e:
-            sys.stderr.write("xmlrpc error: %s %s" % (e.url, e.errmsg))
+            print >> sys.stderr,"xmlrpc error: %s %s" % (e.url, e.errmsg)
         except IOError, e:
-            sys.stderr.write("network error: %s" % e)
+            print >> sys.stderr,"network error: %s" % e
         except Exception, e:
-            sys.stderr.write(str(e))
+            print >> sys.stderr,str(e)
     return __check
 
 @__ub_exception_handler

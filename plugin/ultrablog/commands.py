@@ -126,49 +126,8 @@ def ub_open_item(item_type, item_key, scope='local'):
 def ub_del_item(item_type, key, scope='local'):
     '''Delete an item
     '''
-    # Check prerequesites
-    __ub_check_prerequesites()
-
-    ub_check_item_type(item_type)
-    ub_check_scope(scope)
-
-    # Set editor mode if the corresponding option has been set
-    ub_set_mode()
-
-    enc = vim.eval('&encoding')
-
-    choice = vim.eval("confirm('Are you sure to delete %s %s \"%s\" ?', '&Yes\n&No')" % (scope, ub_get_item_type_name(item_type), key))
-    if choice != '1':
-        return
-
-    sess = Session()
-
-    try:
-        if item_type == 'tmpl':
-            sess.query(Template).filter(Template.name==key.decode(enc)).delete()
-            UBEventQueue.fireEvent(UBTmplDelEvent(key))
-        else:
-            id = int(key)
-
-            if scope=='remote':
-                global cfg, api
-                if item_type=='page':
-                    api.wp.deletePage('', cfg.loginName, cfg.password, id)
-                else:
-                    api.metaWeblog.deletePost('', id, cfg.loginName, cfg.password)
-                UBEventQueue.fireEvent(UBRemotePostDelEvent(id))
-            else:
-                sess.query(Post).filter(Post.id==id).delete()
-                UBEventQueue.fireEvent(UBLocalPostDelEvent(id))
-    except Exception,e:
-        sess.rollback()
-        raise e
-    else:
-        sess.commit()
-    finally:
-        sess.close()
-
-    UBEventQueue.processEvents()
+    cmd = UBCmdDelete(item_type, key, scope)
+    cmd.execute()
 
 @__ub_exception_handler
 def ub_upload_media(file_path):
@@ -570,6 +529,7 @@ class UBCommand(object):
         self.viewName = ub_get_viewname('%')
         self.enc = vim.eval('&encoding')
         self.syntax = vim.eval('&syntax')
+        self.sess = Session()
 
     def checkPrerequisites(self):
         ''' Check the prerequisites
@@ -624,7 +584,7 @@ class UBCommand(object):
         ''' Do something after self._exec()
         protected method, called by self.execute()
         '''
-        pass
+        self.sess.close()
 
     @classmethod
     def doDefault(cls, *args, **kwargs):
@@ -715,18 +675,14 @@ class UBCmdList(UBCommand):
     def _listRemotePosts(self):
         '''List remote posts stored in the blog
         '''
-        global cfg, api
-
         posts = api.metaWeblog.getRecentPosts('', cfg.loginName, cfg.password, self.pageSize)
-        sess = Session()
         for post in posts:
-            local_post = sess.query(Post).filter(Post.post_id==post['postid']).first()
+            local_post = self.sess.query(Post).filter(Post.post_id==post['postid']).first()
             if local_post is None:
                 post['id'] = 0
             else:
                 post['id'] = local_post.id
                 post['post_status'] = local_post.status
-        sess.close()
 
         ub_wise_open_view('remote_post_list')
         vim.current.buffer[0] = "==================== Recent Posts ===================="
@@ -785,18 +741,14 @@ class UBCmdList(UBCommand):
     def _listRemotePages(self):
         '''List remote pages stored in the blog
         '''
-        global cfg, api
-
-        sess = Session()
         pages = api.wp.getPages('', cfg.loginName, cfg.password)
         for page in pages:
-            local_page = sess.query(Post).filter(Post.post_id==page['page_id']).filter(Post.type=='page').first()
+            local_page = self.sess.query(Post).filter(Post.post_id==page['page_id']).filter(Post.type=='page').first()
             if local_page is None:
                 page['id'] = 0
             else:
                 page['id'] = local_page.id
                 page['page_status'] = local_page.status
-        sess.close()
 
         ub_wise_open_view('remote_page_list')
         vim.current.buffer[0] = "==================== Blog Pages ===================="
@@ -815,9 +767,7 @@ class UBCmdList(UBCommand):
     def _listTemplates(self):
         '''List preview templates
         '''
-        sess = Session()
-
-        tmpls = sess.query(Template).all()
+        tmpls = self.sess.query(Template).all()
 
         if len(tmpls)==0:
             print >> sys.stderr,'No template found !'
@@ -913,7 +863,6 @@ class UBCmdSave(UBCommand):
     '''
     def __init__(self):
         UBCommand.__init__(self)
-        self.sess = Session()
         self.item = None
         self.itemKey = None
         self.itemType = self.viewName.split('_')[0]
@@ -942,7 +891,6 @@ class UBCmdSave(UBCommand):
             self.itemKey = self.item.id
             self.metaDict['id'] = self.itemKey
             ub_fill_meta_data(self.metaDict)
-        self.sess.close()
 
         vim.command('setl nomodified')
         
@@ -1089,7 +1037,6 @@ class UBCmdOpen(UBCommand):
         self.itemType = itemType
         self.scope = scope
         self.viewType = viewType
-        self.sess = Session()
         self.saveIt = ub_get_option('ub_save_after_opened', True)
         self.metaData = None
         self.item = None
@@ -1260,9 +1207,7 @@ class UBCmdPreview(UBCommand):
 
             prv_url = prv_url % (cfg.blogURL, ub_get_meta('post_id'))
         else:
-            sess = Session()
-            template = sess.query(Template).filter(Template.name==self.tmpl.decode(self.enc)).first()
-            sess.close()
+            template = self.sess.query(Template).filter(Template.name==self.tmpl.decode(self.enc)).first()
             if template is None:
                 raise UBException("Template '%s' is not found !" % self.tmpl)
 
@@ -1280,23 +1225,56 @@ class UBCmdPreview(UBCommand):
 
         webbrowser.open(prv_url)
 
+class UBCmdDelete(UBCommand):
+    def __init__(self, itemType, itemKey, scope='local'):
+        UBCommand.__init__(self)
+        self.itemType = itemType
+        self.itemKey = itemKey
+        self.scope = scope
+
+    def _preExec(self):
+        UBCmdDelete.doDefault()
+        choice = vim.eval("confirm('Are you sure to delete %s %s \"%s\" ?', '&Yes\n&No')" % (self.scope, ub_get_item_type_name(self.itemType), self.itemKey))
+        if choice != '1': raise UBException('Deletion canceled !')
+
+    def _exec(self):
+        try:
+            if self.itemType == 'tmpl':
+                self.sess.query(Template).filter(Template.name==self.itemKey.decode(self.enc)).delete()
+                UBEventQueue.fireEvent(UBTmplDelEvent(self.itemKey))
+            else:
+                self.itemKey = int(self.itemKey)
+                if self.scope=='remote':
+                    if self.itemType=='page':
+                        api.wp.deletePage('', cfg.loginName, cfg.password, self.itemKey)
+                    else:
+                        api.metaWeblog.deletePost('', self.itemKey, cfg.loginName, cfg.password)
+                    UBEventQueue.fireEvent(UBRemotePostDelEvent(self.itemKey))
+                else:
+                    self.sess.query(Post).filter(Post.id==self.itemKey).delete()
+                    UBEventQueue.fireEvent(UBLocalPostDelEvent(self.itemKey))
+        except Exception,e:
+            self.sess.rollback()
+            self.sess.close()
+            raise e
+        else:
+            self.sess.commit()
+
+        UBEventQueue.processEvents()
+
 def ub_get_templates(name_only=False):
     ''' Fetch and return a list of templates
     '''
-    # Check prerequesites
-    __ub_check_prerequesites()
+    tmpls = []
 
-    # Set editor mode if the corresponding option has been set
-    ub_set_mode()
+    try:
+        sess = Session()
+        tmpls = sess.query(Template).all()
+        sess.close()
 
-    enc = vim.eval('&encoding')
-
-    sess = Session()
-    tmpls = sess.query(Template).all()
-    sess.close()
-
-    if name_only is True:
-        tmpls = [tmpl.name.encode(enc) for tmpl in tmpls]
+        if name_only is True: tmpls = [tmpl.name for tmpl in tmpls]
+    except:
+        pass
 
     return tmpls
 
