@@ -173,6 +173,8 @@ def ub_get_item_type_name(type):
     '''
     if type == 'tmpl':
         return 'template'
+    elif type == 'result':
+        return 'post'
     return type
 
 def ub_get_list_template():

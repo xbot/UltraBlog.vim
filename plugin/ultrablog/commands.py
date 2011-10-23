@@ -123,10 +123,24 @@ def ub_open_item(item_type, item_key, scope='local'):
     cmd.execute()
 
 @__ub_exception_handler
+def ub_open_item_under_cursor(view_type=None):
+    '''Open the item under cursor, invoked in post or page list
+    '''
+    cmd = UBCmdOpenItemUnderCursor(view_type)
+    cmd.execute()
+
+@__ub_exception_handler
 def ub_del_item(item_type, key, scope='local'):
     '''Delete an item
     '''
     cmd = UBCmdDelete(item_type, key, scope)
+    cmd.execute()
+
+@__ub_exception_handler
+def ub_del_item_under_cursor():
+    '''Delete local post, invoked in list view
+    '''
+    cmd = UBCmdDelItemUnderCursor()
     cmd.execute()
 
 @__ub_exception_handler
@@ -417,16 +431,6 @@ def __ub_get_categories():
     cats = api.metaWeblog.getCategories('', cfg.loginName, cfg.password)
     return ', '.join([cat['description'].encode('utf-8') for cat in cats])
 
-def __ub_check_prerequesites():
-    if cfg is None:
-        raise UBException('No valid configurations found !')
-
-    if sqlalchemy is None:
-        raise UBException('SQLAlchemy v0.7 or newer is required !')
-
-    if markdown is None:
-        raise UBException('No module named markdown or markdown2 !')
-
 def ub_get_post_meta_data():
     '''Get all meta data of the post and return a dict
     '''
@@ -661,10 +665,10 @@ class UBCmdList(UBCommand):
 
         vim.command("let b:page_no=%s" % self.pageNo)
         vim.command("let b:page_size=%s" % self.pageSize)
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py __ub_list_open_item('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py __ub_list_open_item('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py __ub_list_open_item('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py __ub_list_del_item()<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
         vim.command("map <buffer> "+ub_get_option('ub_hotkey_pagedown')+" :py ub_list_items('post', 'local', %d, %d)<cr>" % (self.pageSize, self.pageNo+1))
         vim.command("map <buffer> "+ub_get_option('ub_hotkey_pageup')+" :py ub_list_items('post', 'local', %d, %d)<cr>" % (self.pageSize, self.pageNo-1))
         vim.command('call UBClearUndo()')
@@ -690,10 +694,10 @@ class UBCmdList(UBCommand):
         vim.current.buffer.append([(tmpl % (post['id'],post['postid'],post['post_status'],post['title'])).encode(self.enc) for post in posts])
 
         vim.command("let b:page_size=%s" % self.pageSize)
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py __ub_list_open_item('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py __ub_list_open_item('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py __ub_list_open_item('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py __ub_list_del_item()<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
         vim.command('call UBClearUndo()')
         vim.command('setl nomodified')
         vim.command("setl nomodifiable")
@@ -729,10 +733,10 @@ class UBCmdList(UBCommand):
         tmpl = ub_get_list_template()
         vim.current.buffer.append([(tmpl % (page.id,page.post_id,page.status,page.title)).encode(self.enc) for page in pages])
 
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py __ub_list_open_item('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py __ub_list_open_item('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py __ub_list_open_item('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py __ub_list_del_item()<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
         vim.command('call UBClearUndo()')
         vim.command('setl nomodified')
         vim.command("setl nomodifiable")
@@ -755,10 +759,10 @@ class UBCmdList(UBCommand):
         tmpl = ub_get_list_template()
         vim.current.buffer.append([(tmpl % (page['id'],page['page_id'],page['page_status'],page['title'])).encode(self.enc) for page in pages])
 
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py __ub_list_open_item('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py __ub_list_open_item('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py __ub_list_open_item('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py __ub_list_del_item()<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
         vim.command('call UBClearUndo()')
         vim.command('setl nomodified')
         vim.command("setl nomodifiable")
@@ -778,10 +782,10 @@ class UBCmdList(UBCommand):
         line = "%-24s%s"
         vim.current.buffer.append([(line % (tmpl.name,tmpl.description)).encode(self.enc) for tmpl in tmpls])
 
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py __ub_list_open_item('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py __ub_list_open_item('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py __ub_list_open_item('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py __ub_list_del_item()<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
         vim.command('call UBClearUndo()')
         vim.command('setl nomodified')
         vim.command("setl nomodifiable")
@@ -845,10 +849,10 @@ class UBCmdFind(UBCommand):
         vim.command("let b:page_no=%s" % self.pageNo)
         vim.command("let b:page_size=%s" % self.pageSize)
         vim.command("let b:ub_keywords=[%s]" % ','.join(["'%s'" % kw for kw in self.keywords]))
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py __ub_list_open_item('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py __ub_list_open_item('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py __ub_list_open_item('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py __ub_list_del_item()<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
         vim.command("map <buffer> "+ub_get_option('ub_hotkey_pagedown')+" :py ub_find(%d,%s)<cr>" % (self.pageNo+1, ','.join(["'%s'" % kw for kw in self.keywords])))
         vim.command("map <buffer> "+ub_get_option('ub_hotkey_pageup')+" :py ub_find(%d,%s)<cr>" % (self.pageNo-1, ','.join(["'%s'" % kw for kw in self.keywords])))
         vim.command('call UBClearUndo()')
@@ -1072,7 +1076,7 @@ class UBCmdOpen(UBCommand):
         vim.command('setl filetype=%s' % self.item.syntax)
         vim.command('setl wrap')
         vim.command('call UBClearUndo()')
-        if ub_is_id(self.item.id): vim.command('setl nomodified')
+        if self.itemType=='tmpl' or ub_is_id(self.item.id): vim.command('setl nomodified')
         vim.current.window.cursor = (len(self.metaData)+3, 0)
 
     def __openLocalPost(self):
@@ -1177,6 +1181,7 @@ class UBCmdOpen(UBCommand):
         '''
         self.item = self.sess.query(Template).filter(Template.name==self.itemKey).first()
         if self.item is None: raise UBException('No template found !')
+        self.item.syntax = 'html'
 
         self.metaData = dict(\
                 name = self.item.name.encode(self.enc),
@@ -1261,6 +1266,58 @@ class UBCmdDelete(UBCommand):
             self.sess.commit()
 
         UBEventQueue.processEvents()
+
+class UBCmdOpenItemUnderCursor(UBCommand):
+    def __init__(self, viewType=None):
+        UBCommand.__init__(self)
+        self.viewType = viewType
+
+        if not ub_is_view_of_type('list'): raise UBException('Invalid view !')
+
+        vnameParts = self.viewName.split('_')
+        if vnameParts[0]=='search': self.scope = 'local'
+        else: self.scope = vnameParts[0]
+        self.itemType = vnameParts[1]
+
+        lineParts = vim.current.line.split()
+        if ub_is_cursorline_valid('template'):
+            self.itemKey = lineParts[0]
+        elif ub_is_cursorline_valid('general'):
+            if self.scope == 'local':
+                self.itemKey = int(lineParts[0])
+                self.itemType = self.sess.query(Post.type).filter(Post.id==self.itemKey).first()[0]
+            else:
+                self.itemKey = int(lineParts[1])
+        else: raise UBException('This is not an item !')
+
+    def _exec(self):
+        cmd = UBCmdOpen(itemKey=self.itemKey, itemType=self.itemType, scope=self.scope, viewType=self.viewType)
+        cmd.execute()
+
+class UBCmdDelItemUnderCursor(UBCommand):
+    def __init__(self):
+        UBCommand.__init__(self)
+
+        if not ub_is_view_of_type('list'): raise UBException('Invalid view !')
+
+        vnameParts = self.viewName.split('_')
+        if vnameParts[0]=='search': self.scope = 'local'
+        else: self.scope = vnameParts[0]
+        self.itemType = vnameParts[1]
+
+        lineParts = vim.current.line.split()
+        if ub_is_cursorline_valid('template'):
+            self.itemKey = lineParts[0]
+        elif ub_is_cursorline_valid('general'):
+            if self.scope == 'local':
+                self.itemKey = int(lineParts[0])
+                self.itemType = self.sess.query(Post.type).filter(Post.id==self.itemKey).first()[0]
+            else:
+                self.itemKey = int(lineParts[1])
+        else: raise UBException('This is not an item !')
+
+    def _exec(self):
+        ub_del_item(self.itemType, self.itemKey, self.scope)
 
 def ub_get_templates(name_only=False):
     ''' Fetch and return a list of templates
