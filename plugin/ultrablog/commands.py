@@ -171,6 +171,7 @@ def ub_upload_media(file_path):
 def ub_blog_this(type='post', syntax=None):
     '''Create a new post/page with content in the current buffer
     '''
+    if type not in ['post','page']: raise UBException('Invalid post type !')
     if syntax is None:
         syntax = vim.eval('&syntax')
     try:
@@ -180,18 +181,13 @@ def ub_blog_this(type='post', syntax=None):
 
     bf = vim.current.buffer[:]
 
-    if type == 'post':
-        success = ub_new_post(syntax)
-    else:
-        success = ub_new_page(syntax)
-
-    if success is True:
-        regex_meta_end = re.compile('^\s*-->')
-        for line_num in range(0, len(vim.current.buffer)):
-            line = vim.current.buffer[line_num]
-            if regex_meta_end.match(line):
-                break
-        vim.current.buffer.append(bf, line_num+1)
+    ub_new_item(type, syntax)
+    regex_meta_end = re.compile('^\s*-->')
+    for line_num in range(0, len(vim.current.buffer)):
+        line = vim.current.buffer[line_num]
+        if regex_meta_end.match(line):
+            break
+    vim.current.buffer.append(bf, line_num+1)
 
 @__ub_exception_handler
 def ub_convert(to_syntax, from_syntax=None, literal=False):
@@ -216,109 +212,8 @@ def ub_convert(to_syntax, from_syntax=None, literal=False):
 def ub_new_item(item_type='post', mixed='markdown'):
     ''' Create new item: post, page, template
     '''
-    ub_check_item_type(item_type)
-    
-    if item_type=='post' or item_type=='page':
-        ub_check_syntax(mixed)
-
-    eval("ub_new_%s('%s')" % (item_type,mixed))
-
-def ub_new_post(syntax='markdown'):
-    '''Initialize a buffer for writing a new post
-    '''
-    ub_check_syntax(syntax)
-
-    post_meta_data = dict(\
-            id = str(0),
-            post_id = str(0),
-            title = '',
-            categories = __ub_get_categories(),
-            tags = '',
-            slug = '',
-            status = 'draft')
-
-    ub_wise_open_view('post_edit')
-    ub_fill_meta_data(post_meta_data)
-    __ub_append_promotion_link(syntax)
-
-    vim.command('setl filetype=%s' % syntax)
-    vim.command('setl wrap')
-    vim.command('call UBClearUndo()')
-    vim.command('setl nomodified')
-    vim.current.window.cursor = (4, len(vim.current.buffer[3])-1)
-
-    return True
-
-def ub_new_page(syntax='markdown'):
-    '''Initialize a buffer for writing a new page
-    '''
-    ub_check_syntax(syntax)
-
-    page_meta_data = dict(\
-            id = str(0),
-            post_id = str(0),
-            title = '',
-            slug = '',
-            status = 'draft')
-
-    ub_wise_open_view('page_edit')
-    ub_fill_meta_data(page_meta_data)
-
-    vim.command('setl filetype=%s' % syntax)
-    vim.command('setl wrap')
-    vim.command('call UBClearUndo()')
-    vim.command('setl nomodified')
-    vim.current.window.cursor = (4, len(vim.current.buffer[3])-1)
-
-    return True
-
-def ub_new_tmpl(name):
-    '''Initialize a buffer for creating a template
-    '''
-    # Check if the given name is a reserved word
-    try:
-        ub_check_status(name)
-    except UBException:
-        pass
-    else:
-        raise UBException("'%s' is a reserved word !" % name)
-
-    # Check if the given name is already existing
-    enc = vim.eval('&encoding')
-    sess = Session()
-    if sess.query(Template).filter(Template.name==name.decode(enc)).first() is not None:
-        sess.close()
-        raise UBException('Template "%s" exists !' % name)
-
-    meta_data = dict(\
-            name = name,
-            description = '')
-
-    ub_wise_open_view('tmpl_edit')
-    ub_fill_meta_data(meta_data)
-    __ub_append_template_framework()
-
-    vim.command('setl filetype=html')
-    vim.command('setl nowrap')
-    vim.command('call UBClearUndo()')
-    vim.command('setl nomodified')
-    vim.current.window.cursor = (3, len(vim.current.buffer[2])-1)
-
-def __ub_append_template_framework():
-    fw = \
-'''<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>%(title)s</title>
-        <style>
-        </style>
-    </head>
-    <body>
-        %(content)s
-    </body>
-</html>'''
-    lines = fw.split("\n")
-    vim.current.buffer.append(lines)
+    cmd = UBCmdNew(item_type, mixed)
+    cmd.execute()
 
 def ub_fill_meta_data(meta_data):
     if ub_is_view('post_edit'):
@@ -410,26 +305,6 @@ def ub_get_html(body_only=True):
 </html>''' % html
 
     return html
-
-def __ub_append_promotion_link(syntax='markdown'):
-    '''Append a promotion link to the homepage of UltraBlog.vim
-    '''
-    doit = ub_get_option('ub_append_promotion_link')
-    if doit is not None and doit.isdigit() and int(doit) == 1:
-        if ub_is_view('post_edit') or ub_is_view('page_edit'):
-            if syntax == 'markdown':
-                link = 'Posted via [UltraBlog.vim](%s).' % cfg.homepage
-            else:
-                link = 'Posted via <a href="%s">UltraBlog.vim</a>.' % cfg.homepage
-            vim.current.buffer.append(link)
-        else:
-            raise UBException('Invalid view !')
-
-def __ub_get_categories():
-    '''Fetch categories and format them into a string
-    '''
-    cats = api.metaWeblog.getCategories('', cfg.loginName, cfg.password)
-    return ', '.join([cat['description'].encode('utf-8') for cat in cats])
 
 def ub_get_post_meta_data():
     '''Get all meta data of the post and return a dict
@@ -1318,6 +1193,109 @@ class UBCmdDelItemUnderCursor(UBCommand):
 
     def _exec(self):
         ub_del_item(self.itemType, self.itemKey, self.scope)
+
+class UBCmdNew(UBCommand):
+    def __init__(self, itemType='post', mixed='markdown'):
+        UBCommand.__init__(self)
+
+        self.itemType = itemType
+        self.syntax = mixed
+        if self.itemType in ['post','page']:
+            ub_check_syntax(self.syntax)
+        if self.itemType=='tmpl':
+            self.itemKey = mixed
+            self.syntax = 'html'
+
+    def _exec(self):
+        if self.itemType=='post':
+            self.__createNewPost()
+        elif self.itemType=='page':
+            self.__createNewPage()
+        else:
+            self.__createNewTmpl()
+
+    def __createNewPost(self):
+        post_meta_data = dict(\
+                id = str(0),
+                post_id = str(0),
+                title = '',
+                categories = self.__getCategories(),
+                tags = '',
+                slug = '',
+                status = 'draft')
+
+        ub_wise_open_view('post_edit')
+        ub_fill_meta_data(post_meta_data)
+        self.__appendPromotionLink()
+
+    def __createNewPage(self):
+        page_meta_data = dict(\
+                id = str(0),
+                post_id = str(0),
+                title = '',
+                slug = '',
+                status = 'draft')
+
+        ub_wise_open_view('page_edit')
+        ub_fill_meta_data(page_meta_data)
+
+    def __createNewTmpl(self):
+        # Check if the given name is a reserved word
+        try:
+            ub_check_status(self.syntax)
+        except UBException:
+            pass
+        else:
+            raise UBException("'%s' is a reserved word !" % self.syntax)
+
+        # Check if the given name is already existing
+        if self.sess.query(Template).filter(Template.name==self.syntax.decode(self.enc)).first() is not None:
+            self.sess.close()
+            raise UBException('Template "%s" exists !' % self.syntax)
+
+        meta_data = dict(\
+                name = self.syntax,
+                description = '')
+
+        ub_wise_open_view('tmpl_edit')
+        ub_fill_meta_data(meta_data)
+        fw = \
+'''<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>%(title)s</title>
+        <style>
+        </style>
+    </head>
+    <body>
+        %(content)s
+    </body>
+</html>'''
+        lines = fw.split("\n")
+        vim.current.buffer.append(lines)
+
+    def _postExec(self):
+        UBCmdNew.doDefault()
+
+        vim.command('setl filetype=%s' % self.syntax)
+        vim.command('setl nowrap')
+        vim.command('call UBClearUndo()')
+        vim.command('setl nomodified')
+        if self.itemType=='tmpl': vim.current.window.cursor = (3, len(vim.current.buffer[2])-1)
+        else: vim.current.window.cursor = (4, len(vim.current.buffer[3])-1)
+
+    def __getCategories(self):
+        cats = api.metaWeblog.getCategories('', cfg.loginName, cfg.password)
+        return ', '.join([cat['description'].encode('utf-8') for cat in cats])
+
+    def __appendPromotionLink(self):
+        doit = ub_get_option('ub_append_promotion_link')
+        if doit is not None and doit.isdigit() and int(doit) == 1:
+            if self.syntax == 'markdown':
+                link = 'Posted via [UltraBlog.vim](%s).' % cfg.homepage
+            else:
+                link = 'Posted via <a href="%s">UltraBlog.vim</a>.' % cfg.homepage
+            vim.current.buffer.append(link)
 
 def ub_get_templates(name_only=False):
     ''' Fetch and return a list of templates
