@@ -534,6 +534,11 @@ If you discover any bugs not listed here, please contact the |UltraBlog_Author|
   History                                                   *UltraBlog_History*
 ==============================================================================
 
+3.1.0
+    * Change:  Refactorings.
+    * Change:  |:UBConv| can be used in any buffer.
+    * Bugfix:  The second parameter of |:UBThis| cannot take effect.
+
 3.0.0
     * Feature: Mostly rewritten for implementing an event-driven system.
     * Feature: Context search comes with keywords highlighting. A new command

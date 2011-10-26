@@ -164,49 +164,22 @@ def ub_upload_media(file_path):
     img_tmpl_info = ub_get_option('ub_tmpl_img_url', True)
     img_url = img_tmpl_info['tmpl'] % result
     syntax = vim.eval('&syntax')
-    img_url = __ub_convert_str(img_url, img_tmpl_info['syntax'], syntax)
+    img_url = ub_convert_str(img_url, img_tmpl_info['syntax'], syntax)
     vim.current.range.append(img_url.split("\n"))
 
 @__ub_exception_handler
-def ub_blog_this(type='post', syntax=None):
+def ub_blog_this(item_type='post', syntax=None):
     '''Create a new post/page with content in the current buffer
     '''
-    if type not in ['post','page']: raise UBException('Invalid post type !')
-    if syntax is None:
-        syntax = vim.eval('&syntax')
-    try:
-        ub_check_syntax(syntax)
-    except:
-        syntax = 'markdown'
-
-    bf = vim.current.buffer[:]
-
-    ub_new_item(type, syntax)
-    regex_meta_end = re.compile('^\s*-->')
-    for line_num in range(0, len(vim.current.buffer)):
-        line = vim.current.buffer[line_num]
-        if regex_meta_end.match(line):
-            break
-    vim.current.buffer.append(bf, line_num+1)
+    cmd = UBCmdBlogThis(item_type, syntax)
+    cmd.execute()
 
 @__ub_exception_handler
-def ub_convert(to_syntax, from_syntax=None, literal=False):
+def ub_convert(to_syntax, from_syntax=None):
     '''Convert the current buffer from one syntax to another
     '''
-    ub_check_syntax(to_syntax)
-    if from_syntax is None:
-        from_syntax = vim.eval('&syntax')
-    ub_check_syntax(from_syntax)
-
-    content = __ub_get_content()
-    enc = vim.eval('&encoding')
-    new_content = __ub_convert_str(content, from_syntax, to_syntax, enc)
-
-    if literal == True:
-        return new_content
-    else:
-        __ub_set_content(new_content.split("\n"))
-        vim.command('setl filetype=%s' % to_syntax)
+    cmd = UBCmdConvert(to_syntax, from_syntax)
+    cmd.execute()
 
 @__ub_exception_handler
 def ub_new_item(item_type='post', mixed='markdown'):
@@ -214,187 +187,6 @@ def ub_new_item(item_type='post', mixed='markdown'):
     '''
     cmd = UBCmdNew(item_type, mixed)
     cmd.execute()
-
-def ub_fill_meta_data(meta_data):
-    if ub_is_view('post_edit'):
-        __ub_fill_post_meta_data(meta_data)
-    elif ub_is_view('page_edit'):
-        __ub_fill_page_meta_data(meta_data)
-    elif ub_is_view('tmpl_edit'):
-        __ub_fill_tmpl_meta_data(meta_data)
-    else:
-        raise UBException('Unknown view !')
-
-def __ub_fill_post_meta_data(meta_dict):
-    '''Fill the current buffer with some lines of meta data for a post
-    '''
-    meta_text = \
-"""<!--
-$id:              %(id)s
-$post_id:         %(post_id)s
-$title:           %(title)s
-$categories:      %(categories)s
-$tags:            %(tags)s
-$slug:            %(slug)s
-$status:          %(status)s
--->""" % meta_dict
-    
-    meta_lines = meta_text.split('\n')
-    if len(vim.current.buffer) >= len(meta_lines):
-        for i in range(0,len(meta_lines)):
-            vim.current.buffer[i] = meta_lines[i]
-    else:
-        vim.current.buffer[0] = meta_lines[0]
-        vim.current.buffer.append(meta_lines[1:])
-
-def __ub_fill_page_meta_data(meta_dict):
-    '''Fill the current buffer with some lines of meta data for a page
-    '''
-    meta_text = \
-"""<!--
-$id:              %(id)s
-$post_id:         %(post_id)s
-$title:           %(title)s
-$slug:            %(slug)s
-$status:          %(status)s
--->""" % meta_dict
-    
-    meta_lines = meta_text.split('\n')
-    if len(vim.current.buffer) >= len(meta_lines):
-        for i in range(0,len(meta_lines)):
-            vim.current.buffer[i] = meta_lines[i]
-    else:
-        vim.current.buffer[0] = meta_lines[0]
-        vim.current.buffer.append(meta_lines[1:])
-
-def __ub_fill_tmpl_meta_data(meta_dict):
-    '''Fill the current buffer with some lines of meta data for a template
-    '''
-    meta_text = \
-"""<!--
-$name:            %(name)s
-$description:     %(description)s
--->""" % meta_dict
-    
-    meta_lines = meta_text.split('\n')
-    if len(vim.current.buffer) >= len(meta_lines):
-        for i in range(0,len(meta_lines)):
-            vim.current.buffer[i] = meta_lines[i]
-    else:
-        vim.current.buffer[0] = meta_lines[0]
-        vim.current.buffer.append(meta_lines[1:])
-
-def ub_get_html(body_only=True):
-    '''Generate HTML string from the current buffer
-    '''
-    content = __ub_get_content()
-    syntax = vim.eval('&syntax')
-    enc = vim.eval('&encoding')
-    html = ub_convert('html', syntax, True)
-
-    if not body_only:
-        html = \
-'''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-    <head>
-       <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    </head>
-    <body>
-    %s
-    </body>
-</html>''' % html
-
-    return html
-
-def ub_get_post_meta_data():
-    '''Get all meta data of the post and return a dict
-    '''
-    id = ub_get_meta('id')
-    if id is None:
-        id = 0
-    post_id = ub_get_meta('post_id')
-    if post_id is None:
-        post_id = 0
-
-    return dict(\
-        id = id,
-        post_id = post_id,
-        title = ub_get_meta('title'),
-        categories = ub_get_meta('categories'),
-        tags = ub_get_meta('tags'),
-        slug = ub_get_meta('slug'),
-        status = ub_get_meta('status')
-    )
-
-def ub_get_page_meta_data():
-    '''Get all meta data of the page and return a dict
-    '''
-    id = ub_get_meta('id')
-    if id is None:
-        id = 0
-    post_id = ub_get_meta('post_id')
-    if post_id is None:
-        post_id = 0
-
-    return dict(\
-        id = id,
-        post_id = post_id,
-        title = ub_get_meta('title'),
-        slug = ub_get_meta('slug'),
-        status = ub_get_meta('status')
-    )
-
-def __ub_get_content():
-    '''Generate content from the current buffer
-    '''
-    if ub_is_view('post_edit'):
-        meta_dict = ub_get_post_meta_data()
-    elif ub_is_view('page_edit'):
-        meta_dict = ub_get_page_meta_data()
-    else:
-        return None
-
-    content = "\n".join(vim.current.buffer[len(meta_dict)+2:])
-    return content
-
-def __ub_set_content(lines):
-    '''Set the given lines to the content area of the current buffer
-    '''
-    if ub_is_view('post_edit'):
-        meta_dict = ub_get_post_meta_data()
-    elif ub_is_view('page_edit'):
-        meta_dict = ub_get_page_meta_data()
-    else:
-        return False
-
-    del vim.current.buffer[len(meta_dict)+2:]
-    vim.current.buffer.append(lines, len(meta_dict)+2)
-    return True
-
-def __ub_convert_str(content, from_syntax, to_syntax, encoding=None):
-    if from_syntax == to_syntax \
-        or not ub_is_valid_syntax(from_syntax) \
-        or not ub_is_valid_syntax(to_syntax):
-        return content
-
-    if from_syntax == 'markdown' and to_syntax == 'html':
-        if encoding is not None:
-            new_content = markdown.markdown(content.decode(encoding)).encode(encoding)
-        else:
-            new_content = markdown.markdown(content)
-    else:
-        cmd_parts = []
-        cmd_parts.append(ub_get_option('ub_converter_command'))
-        cmd_parts.extend(ub_get_option('ub_converter_options'))
-        try:
-            cmd_parts.append(ub_get_option('ub_converter_option_from') % from_syntax)
-            cmd_parts.append(ub_get_option('ub_converter_option_to') % to_syntax)
-        except TypeError:
-            pass
-        import subprocess
-        p = subprocess.Popen(cmd_parts, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        new_content = p.communicate(content)[0].replace("\r\n", "\n")
-    return new_content
 
 class UBCommand(object):
     ''' Abstract parent class for all commands of UB
@@ -420,24 +212,34 @@ class UBCommand(object):
         if api is None: raise UBException('Cannot init API !')
         if db is None: raise UBException('Cannot connect to database !')
 
-    def checkItemType(self):
+    def checkItemType(self, itemType=None):
         ''' Check if the item type is among the available ones
         '''
-        if not self.itemType in ['post', 'page', 'tmpl', None]:
+        itemType = itemType and itemType or self.itemType
+        if not itemType in ['post', 'page', 'tmpl', None]:
             raise UBException('Unknow item type, available types are: post, page and tmpl !')
 
-    def checkScope(self):
+    def checkScope(self, scope=None):
         '''Check the given scope,
         return True if it is local,
         return False if it is remote,
         raise an exception if it is neither of the upper two
         '''
-        if self.scope=='local':
+        scope = scope and scope or self.scope
+        if scope=='local':
             return True
-        elif self.scope=='remote':
+        elif scope=='remote':
             return False
         else:
             raise UBException('Invalid scope !')
+
+    def checkSyntax(self, syntax=None):
+        ''' Check if the given syntax is among the available ones
+        '''
+        syntax = syntax and syntax or self.syntax
+        valid_syntax = ['markdown', 'html', 'rst', 'textile', 'latex']
+        if syntax.lower() not in valid_syntax:
+            raise UBException('Unknown syntax, valid syntaxes are %s' % str(valid_syntax))
 
     def execute(self):
         ''' The main functional method of this command
@@ -452,6 +254,7 @@ class UBCommand(object):
         '''
         self.checkItemType()
         self.checkScope()
+        if not ub_is_view_of_type('list'): self.checkSyntax()
 
     def _exec(self):
         ''' Do the main part of the job
@@ -790,8 +593,9 @@ class UBCmdSave(UBCommand):
             tmpl = Template()
             tmpl.name = name
 
+        meta_dict = ub_get_tmpl_meta_data()
+        tmpl.content = "\n".join(vim.current.buffer[len(meta_dict)+2:]).decode(self.enc)
         tmpl.description = ub_get_meta('description').decode(self.enc)
-        tmpl.content = "\n".join(vim.current.buffer[4:]).decode(self.enc)
 
         self.item = tmpl
 
@@ -1200,8 +1004,6 @@ class UBCmdNew(UBCommand):
 
         self.itemType = itemType
         self.syntax = mixed
-        if self.itemType in ['post','page']:
-            ub_check_syntax(self.syntax)
         if self.itemType=='tmpl':
             self.itemKey = mixed
             self.syntax = 'html'
@@ -1297,19 +1099,35 @@ class UBCmdNew(UBCommand):
                 link = 'Posted via <a href="%s">UltraBlog.vim</a>.' % cfg.homepage
             vim.current.buffer.append(link)
 
-def ub_get_templates(name_only=False):
-    ''' Fetch and return a list of templates
-    '''
-    tmpls = []
+class UBCmdBlogThis(UBCommand):
+    def __init__(self, itemType='post', syntax=None):
+        UBCommand.__init__(self)
+        self.itemType = itemType
+        if syntax is not None: self.syntax = syntax
 
-    try:
-        sess = Session()
-        tmpls = sess.query(Template).all()
-        sess.close()
+    def _exec(self):
+        bf = vim.current.buffer[:]
+        ub_new_item(self.itemType, self.syntax)
+        regex_meta_end = re.compile('^\s*-->')
+        for line_num in range(0, len(vim.current.buffer)):
+            line = vim.current.buffer[line_num]
+            if regex_meta_end.match(line):
+                break
+        vim.current.buffer.append(bf, line_num+1)
 
-        if name_only is True: tmpls = [tmpl.name for tmpl in tmpls]
-    except:
-        pass
+class UBCmdConvert(UBCommand):
+    def __init__(self, toSyntax, fromSyntax=None):
+        UBCommand.__init__(self)
+        self.toSyntax = toSyntax
+        if fromSyntax is not None: self.syntax = fromSyntax
 
-    return tmpls
+    def _preExec(self):
+        UBCmdConvert.doDefault()
+        self.checkSyntax(self.toSyntax)
+
+    def _exec(self):
+        content = ub_get_content()
+        content = ub_convert_str(content, self.syntax, self.toSyntax, self.enc)
+        ub_set_content(content.split("\n"))
+        vim.command('setl filetype=%s' % self.toSyntax)
 

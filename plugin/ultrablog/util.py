@@ -47,19 +47,6 @@ def ub_clear_buffer(expr, force=False):
     del vim.buffers[nr-1][:]
     vim.command('setl nomodified')
 
-def ub_check_scope(scope):
-    '''Check the given scope,
-    return True if it is local,
-    return False if it is remote,
-    raise an exception if it is neither of the upper two
-    '''
-    if scope=='local':
-        return True
-    elif scope=='remote':
-        return False
-    else:
-        raise UBException('Invalid scope !')
-
 def ub_check_status(status):
     '''Check if the given status is valid,
     return True if status is publish
@@ -70,19 +57,6 @@ def ub_check_status(status):
         return False
     else:
         raise UBException('Invalid status !')
-
-def ub_check_syntax(syntax):
-    ''' Check if the given syntax is among the available ones
-    '''
-    valid_syntax = ['markdown', 'html', 'rst', 'textile', 'latex']
-    if syntax.lower() not in valid_syntax:
-        raise UBException('Unknown syntax, valid syntaxes are %s' % str(valid_syntax))
-
-def ub_check_item_type(item_type):
-    ''' Check if the given parameter item type is among the available ones
-    '''
-    if not item_type in ['post', 'page', 'tmpl']:
-        raise UBException('Unknow item type, available types are: post, page and tmpl !')
 
 def ub_check_reserved_word(rw):
     ''' Check if the given parameter is a reserved word
@@ -380,6 +354,213 @@ def ub_set_view_outdated(expr, outdated=True):
     val = (outdated is True and 1) or 0
     if nr is not None:
         vim.command("call setbufvar(%d,'ub_view_is_outdated',%d)" % (nr,val))
+
+def ub_fill_meta_data(meta_data):
+    if ub_is_view('post_edit'):
+        __ub_fill_post_meta_data(meta_data)
+    elif ub_is_view('page_edit'):
+        __ub_fill_page_meta_data(meta_data)
+    elif ub_is_view('tmpl_edit'):
+        __ub_fill_tmpl_meta_data(meta_data)
+    else:
+        raise UBException('Unknown view !')
+
+def __ub_fill_post_meta_data(meta_dict):
+    '''Fill the current buffer with some lines of meta data for a post
+    '''
+    meta_text = \
+"""<!--
+$id:              %(id)s
+$post_id:         %(post_id)s
+$title:           %(title)s
+$categories:      %(categories)s
+$tags:            %(tags)s
+$slug:            %(slug)s
+$status:          %(status)s
+-->""" % meta_dict
+    
+    meta_lines = meta_text.split('\n')
+    if len(vim.current.buffer) >= len(meta_lines):
+        for i in range(0,len(meta_lines)):
+            vim.current.buffer[i] = meta_lines[i]
+    else:
+        vim.current.buffer[0] = meta_lines[0]
+        vim.current.buffer.append(meta_lines[1:])
+
+def __ub_fill_page_meta_data(meta_dict):
+    '''Fill the current buffer with some lines of meta data for a page
+    '''
+    meta_text = \
+"""<!--
+$id:              %(id)s
+$post_id:         %(post_id)s
+$title:           %(title)s
+$slug:            %(slug)s
+$status:          %(status)s
+-->""" % meta_dict
+    
+    meta_lines = meta_text.split('\n')
+    if len(vim.current.buffer) >= len(meta_lines):
+        for i in range(0,len(meta_lines)):
+            vim.current.buffer[i] = meta_lines[i]
+    else:
+        vim.current.buffer[0] = meta_lines[0]
+        vim.current.buffer.append(meta_lines[1:])
+
+def __ub_fill_tmpl_meta_data(meta_dict):
+    '''Fill the current buffer with some lines of meta data for a template
+    '''
+    meta_text = \
+"""<!--
+$name:            %(name)s
+$description:     %(description)s
+-->""" % meta_dict
+    
+    meta_lines = meta_text.split('\n')
+    if len(vim.current.buffer) >= len(meta_lines):
+        for i in range(0,len(meta_lines)):
+            vim.current.buffer[i] = meta_lines[i]
+    else:
+        vim.current.buffer[0] = meta_lines[0]
+        vim.current.buffer.append(meta_lines[1:])
+
+def ub_get_html(body_only=True):
+    '''Generate HTML string from the current buffer
+    '''
+    content = ub_get_content()
+    syntax = vim.eval('&syntax')
+    enc = vim.eval('&encoding')
+    html = ub_convert_str(content, syntax, 'html', enc)
+
+    if not body_only:
+        html = \
+'''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+       <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    </head>
+    <body>
+    %s
+    </body>
+</html>''' % html
+
+    return html
+
+def ub_get_post_meta_data():
+    '''Get all meta data of the post and return a dict
+    '''
+    id = ub_get_meta('id')
+    if id is None:
+        id = 0
+    post_id = ub_get_meta('post_id')
+    if post_id is None:
+        post_id = 0
+
+    return dict(\
+        id = id,
+        post_id = post_id,
+        title = ub_get_meta('title'),
+        categories = ub_get_meta('categories'),
+        tags = ub_get_meta('tags'),
+        slug = ub_get_meta('slug'),
+        status = ub_get_meta('status')
+    )
+
+def ub_get_page_meta_data():
+    '''Get all meta data of the page and return a dict
+    '''
+    id = ub_get_meta('id')
+    if id is None:
+        id = 0
+    post_id = ub_get_meta('post_id')
+    if post_id is None:
+        post_id = 0
+
+    return dict(\
+        id = id,
+        post_id = post_id,
+        title = ub_get_meta('title'),
+        slug = ub_get_meta('slug'),
+        status = ub_get_meta('status')
+    )
+
+def ub_get_tmpl_meta_data():
+    return dict(\
+        name = ub_get_meta('name'),
+        description = ub_get_meta('description')
+    )
+
+def ub_get_content():
+    '''Generate content from the current buffer
+    '''
+    if ub_is_view('post_edit'):
+        meta_dict = ub_get_post_meta_data()
+    elif ub_is_view('page_edit'):
+        meta_dict = ub_get_page_meta_data()
+    elif ub_is_view('tmpl_edit'):
+        meta_dict = ub_get_tmpl_meta_data()
+    else:
+        return "\n".join(vim.current.buffer[:])
+
+    content = "\n".join(vim.current.buffer[len(meta_dict)+2:])
+    return content
+
+def ub_set_content(lines):
+    '''Set the given lines to the content area of the current buffer
+    '''
+    meta_dict = None
+    if ub_is_view('post_edit'):
+        meta_dict = ub_get_post_meta_data()
+    elif ub_is_view('page_edit'):
+        meta_dict = ub_get_page_meta_data()
+    elif ub_is_view('tmpl_edit'):
+        meta_dict = ub_get_tmpl_meta_data()
+
+    idx = meta_dict and len(meta_dict)+2 or 0
+    del vim.current.buffer[idx:]
+    vim.current.buffer.append(lines, idx)
+    return True
+
+def ub_convert_str(content, from_syntax, to_syntax, encoding=None):
+    if from_syntax == to_syntax \
+        or not ub_is_valid_syntax(from_syntax) \
+        or not ub_is_valid_syntax(to_syntax):
+        return content
+
+    if from_syntax == 'markdown' and to_syntax == 'html':
+        if encoding is not None:
+            new_content = markdown.markdown(content.decode(encoding)).encode(encoding)
+        else:
+            new_content = markdown.markdown(content)
+    else:
+        cmd_parts = []
+        cmd_parts.append(ub_get_option('ub_converter_command'))
+        cmd_parts.extend(ub_get_option('ub_converter_options'))
+        try:
+            cmd_parts.append(ub_get_option('ub_converter_option_from') % from_syntax)
+            cmd_parts.append(ub_get_option('ub_converter_option_to') % to_syntax)
+        except TypeError:
+            pass
+        import subprocess
+        p = subprocess.Popen(cmd_parts, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        new_content = p.communicate(content)[0].replace("\r\n", "\n")
+    return new_content
+
+def ub_get_templates(name_only=False):
+    ''' Fetch and return a list of templates
+    '''
+    tmpls = []
+
+    try:
+        sess = Session()
+        tmpls = sess.query(Template).all()
+        sess.close()
+
+        if name_only is True: tmpls = [tmpl.name for tmpl in tmpls]
+    except:
+        pass
+
+    return tmpls
 
 if __name__ == '__main__':
     pass
