@@ -168,10 +168,10 @@ def ub_upload_media(file_path):
     vim.current.range.append(img_url.split("\n"))
 
 @__ub_exception_handler
-def ub_blog_this(item_type='post', syntax=None):
+def ub_blog_this(item_type='post', to_syntax=None, from_syntax=None):
     '''Create a new post/page with content in the current buffer
     '''
-    cmd = UBCmdBlogThis(item_type, syntax)
+    cmd = UBCmdBlogThis(item_type, to_syntax, from_syntax)
     cmd.execute()
 
 @__ub_exception_handler
@@ -191,16 +191,27 @@ def ub_new_item(item_type='post', mixed='markdown'):
 class UBCommand(object):
     ''' Abstract parent class for all commands of UB
     '''
-    def __init__(self):
+    def __init__(self, isContentAware=False):
         self.checkPrerequisites()
         # Set editor mode if the corresponding option has been set
         ub_set_mode()
+
+        self.isContentAware = isContentAware
         self.scope = 'local'
         self.itemType = None
-        self.viewName = ub_get_viewname('%')
+        self.viewScopes = []
         self.enc = vim.eval('&encoding')
         self.syntax = vim.eval('&syntax')
         self.sess = Session()
+        self.viewName = ub_get_viewname('%')
+
+        if self.viewName is not None:
+            vnameParts = self.viewName.split('_')
+            if ub_is_view_of_type('list'):
+                self.itemType = vnameParts[1]
+                self.scope = vnameParts[0]=='search' and 'local' or vnameParts[0]
+            if ub_is_view_of_type('edit'):
+                self.itemType = vnameParts[0]
 
     def checkPrerequisites(self):
         ''' Check the prerequisites
@@ -241,6 +252,15 @@ class UBCommand(object):
         if syntax.lower() not in valid_syntax:
             raise UBException('Unknown syntax, valid syntaxes are %s' % str(valid_syntax))
 
+    def checkViewScope(self, viewName=None):
+        ''' Check if the given viewname is among the available ones
+        '''
+        viewName = viewName is None and self.viewName or viewName
+        if len(self.viewScopes)>0:
+            for scope in self.viewScopes:
+                if viewName.endswith(scope): return
+            raise UBException('Invalid view, this command is only allowed in %s !' % str(self.viewScopes))
+
     def execute(self):
         ''' The main functional method of this command
         '''
@@ -254,7 +274,8 @@ class UBCommand(object):
         '''
         self.checkItemType()
         self.checkScope()
-        if not ub_is_view_of_type('list'): self.checkSyntax()
+        self.checkViewScope()
+        if self.isContentAware is True: self.checkSyntax()
 
     def _exec(self):
         ''' Do the main part of the job
@@ -544,36 +565,37 @@ class UBCmdSave(UBCommand):
     ''' Save items
     '''
     def __init__(self):
-        UBCommand.__init__(self)
+        UBCommand.__init__(self, True)
         self.item = None
         self.itemKey = None
-        self.itemType = self.viewName.split('_')[0]
+        self.metaDict = None
+        self.viewScopes = ['post_edit', 'page_edit', 'tmpl_edit']
+        if self.viewName is not None: self.itemType = self.viewName.split('_')[0]
         if self.itemType in ['post', 'page']: self.metaDict = eval("ub_get_%s_meta_data()" % self.itemType)
-        else: self.metaDict = None
 
     def _preExec(self):
         UBCmdSave.doDefault()
         # Do not bother if the current buffer is not modified
         if vim.eval('&modified')=='0': raise UBException('This buffer has not been modified !')
-        if self.viewName not in ['post_edit', 'page_edit', 'tmpl_edit']: raise UBException('Invalid view !')
 
     def _exec(self):
         if self.itemType=='post': self.__loadPost()
         elif self.itemType=='page': self.__loadPage()
         else: self.__loadTmpl()
 
-    def _postExec(self):
-        UBCmdSave.doDefault()
-
         self.sess.add(self.item)
         self.sess.commit()
+
         if self.itemType == 'tmpl':
             self.itemKey = name
         else:
             self.itemKey = self.item.id
             self.metaDict['id'] = self.itemKey
-            ub_fill_meta_data(self.metaDict)
 
+    def _postExec(self):
+        UBCmdSave.doDefault()
+
+        ub_fill_meta_data(self.metaDict)
         vim.command('setl nomodified')
         
         evt = eval("UB%sSaveEvent('%s')" % (self.itemType.capitalize(), self.itemKey));
@@ -647,34 +669,27 @@ class UBCmdSend(UBCommand):
     ''' Send item
     '''
     def __init__(self, status=None):
-        UBCommand.__init__(self)
-        self.status = status
-        if self.status is None:
-            self.status = ub_get_meta('status')
+        UBCommand.__init__(self, True)
+        self.status = status is not None and status or ub_get_meta('status')
         self.publish = ub_check_status(self.status)
-        self.itemType = self.viewName.split('_')[0]
+        if self.viewName is not None: self.itemType = self.viewName.split('_')[0]
         self.item = None
-
-    def _preExec(self):
-        UBCmdSend.doDefault()
-        if self.viewName not in ['post_edit', 'page_edit', 'tmpl_edit']: raise UBException('Invalid view !')
+        self.viewScopes = ['post_edit', 'page_edit', 'tmpl_edit'];
 
     def _exec(self):
         if self.itemType=='post': self.__loadPost()
         else: self.__loadPage()
 
-    def _postExec(self):
         post_id = ub_get_meta('post_id')
         if post_id is None:
             post_id = api.metaWeblog.newPost('', cfg.loginName, cfg.password, self.item, self.publish)
-            msg = "%s sent as %s !" % (self.itemType.capitalize(), self.status)
         else:
             api.metaWeblog.editPost(post_id, cfg.loginName, cfg.password, self.item, self.publish)
-            msg = "%s sent as %s !" % (self.itemType.capitalize(), self.status)
+        msg = "%s sent as %s !" % (self.itemType.capitalize(), self.status)
         print >> sys.stdout,msg
 
-        evt = eval("UB%sSendEvent(%s)" % (self.itemType.capitalize(), post_id))
-        UBEventQueue.fireEvent(evt)
+    def _postExec(self):
+        UBCmdSend.doDefault()
 
         if post_id != ub_get_meta('post_id'):
             ub_set_meta('post_id', post_id)
@@ -685,6 +700,8 @@ class UBCmdSend(UBCommand):
         if saveit is not None and saveit.isdigit() and int(saveit) == 1:
             ub_save_item()
         
+        evt = eval("UB%sSendEvent(%s)" % (self.itemType.capitalize(), post_id))
+        UBEventQueue.fireEvent(evt)
         UBEventQueue.processEvents()
 
     def __loadPost(self):
@@ -745,12 +762,12 @@ class UBCmdOpen(UBCommand):
             else:
                 self.__openRemotePage()
 
-    def _postExec(self):
-        UBCmdOpen.doDefault()
-
         ub_wise_open_view('%s_edit' % self.itemType, self.viewType)
         ub_fill_meta_data(self.metaData)
         vim.current.buffer.append(self.item.content.encode(self.enc).split("\n"))
+
+    def _postExec(self):
+        UBCmdOpen.doDefault()
 
         vim.command('setl filetype=%s' % self.item.syntax)
         vim.command('setl wrap')
@@ -870,14 +887,9 @@ class UBCmdPreview(UBCommand):
     ''' Preview command
     '''
     def __init__(self, tmpl=None):
-        UBCommand.__init__(self)
-        self.tmpl = tmpl
-        if self.tmpl is None:
-            self.tmpl = ub_get_option('ub_default_template')
-
-    def _preExec(self):
-        UBCmdPreview.doDefault()
-        if self.viewName not in ['post_edit', 'page_edit']: raise UBException('Invalid view !')
+        UBCommand.__init__(self, True)
+        self.tmpl = tmpl is not None and tmpl or ub_get_option('ub_default_template')
+        self.viewScopes = ['post_edit', 'page_edit']
 
     def _exec(self):
         prv_url = ''
@@ -950,13 +962,7 @@ class UBCmdOpenItemUnderCursor(UBCommand):
     def __init__(self, viewType=None):
         UBCommand.__init__(self)
         self.viewType = viewType
-
-        if not ub_is_view_of_type('list'): raise UBException('Invalid view !')
-
-        vnameParts = self.viewName.split('_')
-        if vnameParts[0]=='search': self.scope = 'local'
-        else: self.scope = vnameParts[0]
-        self.itemType = vnameParts[1]
+        self.viewScopes = ['list']
 
         lineParts = vim.current.line.split()
         if ub_is_cursorline_valid('template'):
@@ -976,13 +982,7 @@ class UBCmdOpenItemUnderCursor(UBCommand):
 class UBCmdDelItemUnderCursor(UBCommand):
     def __init__(self):
         UBCommand.__init__(self)
-
-        if not ub_is_view_of_type('list'): raise UBException('Invalid view !')
-
-        vnameParts = self.viewName.split('_')
-        if vnameParts[0]=='search': self.scope = 'local'
-        else: self.scope = vnameParts[0]
-        self.itemType = vnameParts[1]
+        self.viewScopes = ['list']
 
         lineParts = vim.current.line.split()
         if ub_is_cursorline_valid('template'):
@@ -1000,7 +1000,7 @@ class UBCmdDelItemUnderCursor(UBCommand):
 
 class UBCmdNew(UBCommand):
     def __init__(self, itemType='post', mixed='markdown'):
-        UBCommand.__init__(self)
+        UBCommand.__init__(self, True)
 
         self.itemType = itemType
         self.syntax = mixed
@@ -1100,24 +1100,29 @@ class UBCmdNew(UBCommand):
             vim.current.buffer.append(link)
 
 class UBCmdBlogThis(UBCommand):
-    def __init__(self, itemType='post', syntax=None):
-        UBCommand.__init__(self)
+    def __init__(self, itemType='post', toSyntax=None, fromSyntax=None):
+        UBCommand.__init__(self, True)
+
         self.itemType = itemType
-        if syntax is not None: self.syntax = syntax
+        self.toSyntax = toSyntax is None and self.syntax or toSyntax
+        self.syntax = fromSyntax is None and self.syntax or fromSyntax
+
+    def _preExec(self):
+        UBCmdBlogThis.doDefault()
+        self.checkSyntax(self.toSyntax)
 
     def _exec(self):
         bf = vim.current.buffer[:]
-        ub_new_item(self.itemType, self.syntax)
+        ub_new_item(self.itemType, self.toSyntax)
         regex_meta_end = re.compile('^\s*-->')
         for line_num in range(0, len(vim.current.buffer)):
             line = vim.current.buffer[line_num]
-            if regex_meta_end.match(line):
-                break
-        vim.current.buffer.append(bf, line_num+1)
+            if regex_meta_end.match(line): break
+        vim.current.buffer.append(ub_convert_str("\n".join(bf), self.syntax, self.toSyntax, self.enc).split("\n"), line_num+1)
 
 class UBCmdConvert(UBCommand):
     def __init__(self, toSyntax, fromSyntax=None):
-        UBCommand.__init__(self)
+        UBCommand.__init__(self, True)
         self.toSyntax = toSyntax
         if fromSyntax is not None: self.syntax = fromSyntax
 

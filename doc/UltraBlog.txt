@@ -291,13 +291,16 @@ All keymappings can be customized by setting some options, refer to
     Upload media. This command can only be executed in a post edit view, and 
     the URL of the uploaed file will be appended in that buffer.
 
-:UBThis [item [syntax]]                                               *:UBThis*
+:UBThis [item [to_syntax [from_syntax]]                               *:UBThis*
     Create a new post or page which is filled with content in the current 
     buffer. 
     
-    If no parameter is specified, the first parameter will be default to "post".
-    For the second one, the syntax in the current buffer is used, if no syntax 
-    has been set to the current buffer, then "markdown" is used.
+    If no parameter is specified, the first parameter will be default to 
+    "post"; for the second and the third one, the syntax of the current buffer
+    is used.
+
+    Content of the current buffer will be automatically converted from the
+    [from_syntax] to the [to_syntax].
 
 :UBConv {to_syntax} [from_syntax]                                     *:UBConv*
     Convert the current buffer from 'from_syntax' to 'to_syntax'.
@@ -536,7 +539,10 @@ If you discover any bugs not listed here, please contact the |UltraBlog_Author|
 
 3.1.0
     * Change:  Refactorings.
+    * Change:  Solve the crash problem existing in MacVim only.
     * Change:  |:UBConv| can be used in any buffer.
+    * Change:  |:UBThis| now has a third parameter, which enables convertions
+               between syntaxes.
     * Bugfix:  The second parameter of |:UBThis| cannot take effect.
 
 3.0.0

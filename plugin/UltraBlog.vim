@@ -148,8 +148,9 @@ function! UBThisCmpl(ArgLead, CmdLine, CursorPos)"{{{
                 call add(results, obj)
             endif
         endfor
-    " For the second argument, complete the scope
-    elseif len(lst)==2 && count(['post', 'page'], lst[1])==1
+    " For the second argument, complete the syntax to be converted to
+    " For the third argument, complete the syntax to be converted from
+    elseif (len(lst)==2 || len(lst)==3) && count(['post', 'page'], lst[1])==1
         let syntaxes = ['markdown','html','rst','textile','latex']
         for synx in syntaxes
             if stridx(synx,a:ArgLead)==0
