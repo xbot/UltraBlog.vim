@@ -307,14 +307,8 @@ class UBCmdList(UBCommand):
         UBCommand.__init__(self)
         self.itemType = itemType
         self.scope = scope
-        self.pageSize = pageSize
-        if self.pageSize is None:
-            self.pageSize = int(ub_get_option("ub_%s_pagesize" % self.scope))
-        self.pageSize = int(self.pageSize)
-        self.pageNo = pageNo
-        if self.pageNo is None:
-            self.pageNo = 1
-        self.pageNo = int(self.pageNo)
+        self.pageSize = int(pageSize is not None and pageSize or ub_get_option("ub_%s_pagesize" % self.scope))
+        self.pageNo = int(pageNo is not None and pageNo or 1)
 
     def _preExec(self):
         UBCmdList.doDefault()
@@ -496,10 +490,7 @@ class UBCmdFind(UBCommand):
     def __init__(self, pageNo, *keywords):
         UBCommand.__init__(self)
         self.pageSize = int(ub_get_option("ub_%s_pagesize" % self.scope))
-        self.pageNo = pageNo
-        if self.pageNo is None:
-            self.pageNo = 1
-        self.pageNo = int(self.pageNo)
+        self.pageNo = int(pageNo is not None pageNo or 1)
         self.keywords = keywords
 
     def _preExec(self):
@@ -720,20 +711,13 @@ class UBCmdOpen(UBCommand):
     '''
     def __init__(self, itemKey, itemType, scope='local', viewType=None):
         UBCommand.__init__(self)
-        self.itemKey = itemKey
+        self.itemKey = itemType=='tmpl' and self.itemKey.decode(self.enc) or int(itemKey)
         self.itemType = itemType
         self.scope = scope
         self.viewType = viewType
         self.saveIt = ub_get_option('ub_save_after_opened', True)
         self.metaData = None
         self.item = None
-
-        tmp = type(self.itemKey)
-        if tmp is types.IntType: pass
-        elif tmp is types.StringType:
-            if self.itemKey.isdigit(): self.itemKey = int(self.itemKey)
-            else: self.itemKey = self.itemKey.decode(self.enc)
-        else: raise UBException('Illegal item key !')
 
     def _exec(self):
         if self.scope=='local':
