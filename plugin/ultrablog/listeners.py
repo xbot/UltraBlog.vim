@@ -39,7 +39,7 @@ class UBTmplDelListener(UBListener):
     def processEvent(evt):
         for nr in ub_get_buffers(['local_tmpl_list']):
             if nr == ub_get_bufnr('%'):
-                ub_list_templates()
+                ub_refresh_current_view()
             else:
                 ub_set_view_outdated(nr)
 

@@ -318,17 +318,10 @@ def ub_get_blog_settings():
         def __init__(self, rawSettings):
             self.loginName = rawSettings['login_name'].strip()
             self.password = rawSettings['password'].strip()
-            self.xmlrpc = rawSettings['xmlrpc'].strip()
             self.dbf = rawSettings['db'].strip()
-        
-        @property
-        def blogURL(self):
-            blog_url = None
-            if ub_is_url(self.xmlrpc):
-                url_parts = self.xmlrpc.split('/')
-                url_parts.pop()
-                blog_url = '/'.join(url_parts)
-            return blog_url
+            self.url = rawSettings['url'].strip()
+            self.url = self.url.endswith('/') and self.url or self.url+'/'
+            self.xmlrpc = self.url+'xmlrpc.php'
 
     if vim.eval('exists("ub_blog")') == '0':
         return None

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os,xmlrpclib
+import os,xmlrpclib,sys
 import util
 
 try:
@@ -147,8 +147,15 @@ def ub_set_mode():
         Base.metadata.create_all(db)
         ub_init_template()
 
+cfg = None
 try:
     cfg = util.ub_get_blog_settings()
+except KeyError,e:
+    print >> sys.stdout,'Missing key %s in the settings list of UltraBlog.vim !' % str(e)
+except:
+    pass
+
+try:
     api = xmlrpclib.ServerProxy(cfg.xmlrpc)
     db = sqlalchemy.create_engine("sqlite:///%s" % cfg.dbf)
 
@@ -158,6 +165,5 @@ try:
     ub_upgrade()
     ub_init_template()
 except:
-    cfg = None
     api = None
     db  = None

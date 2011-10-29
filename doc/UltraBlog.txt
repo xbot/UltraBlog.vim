@@ -329,7 +329,7 @@ ub_blog                                                               *ub_blog*
     Example:
         let ub_blog = {'login_name':'admin',
                     \'password':'pass2011',
-                    \'xmlrpc':'http://www.sample.com/xmlrpc.php',
+                    \'url':'http://www.sample.com/',
                     \'db':'$VIM/UltraBlog.db'
                     \}
     Keys:
@@ -538,7 +538,10 @@ If you discover any bugs not listed here, please contact the |UltraBlog_Author|
 ==============================================================================
 
 3.1.0
-    * Change:  Refactorings.
+    * Change:  The key "xmlrpc" of the settings list is dropped, a new one
+               with the name "url" is added, you should set its value to the
+               blog url.
+    * Change:  Source code refactorings.
     * Change:  Solve the crash problem existing in MacVim only.
     * Change:  |:UBConv| can be used in any buffer.
     * Change:  |:UBThis| now has a third parameter, which enables convertions

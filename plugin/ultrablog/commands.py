@@ -216,11 +216,11 @@ class UBCommand(object):
     def checkPrerequisites(self):
         ''' Check the prerequisites
         '''
-        if sqlalchemy is None: raise UBException('SQLAlchemy is missing !')
+        if sqlalchemy is None: raise UBException('Cannot find SQLAlchemy !')
         if Base is None or Session is None or Post is None or Template is None:
             raise UBException('Cannot create database objects !')
-        if cfg is None: raise UBException('Cannot get UB settings !')
-        if api is None: raise UBException('Cannot init API !')
+        if cfg is None: raise UBException('Settings of UltraBlog.vim is missing or invalid !')
+        if api is None: raise UBException('Cannot initiate API !')
         if db is None: raise UBException('Cannot connect to database !')
 
     def checkItemType(self, itemType=None):
@@ -247,18 +247,18 @@ class UBCommand(object):
     def checkSyntax(self, syntax=None):
         ''' Check if the given syntax is among the available ones
         '''
-        syntax = syntax and syntax or self.syntax
+        syntax = syntax is not None and syntax or self.syntax
         valid_syntax = ['markdown', 'html', 'rst', 'textile', 'latex']
-        if syntax.lower() not in valid_syntax:
+        if syntax is None or syntax.lower() not in valid_syntax:
             raise UBException('Unknown syntax, valid syntaxes are %s' % str(valid_syntax))
 
     def checkViewScope(self, viewName=None):
         ''' Check if the given viewname is among the available ones
         '''
-        viewName = viewName is None and self.viewName or viewName
+        viewName = viewName is not None and viewName or self.viewName
         if len(self.viewScopes)>0:
             for scope in self.viewScopes:
-                if viewName.endswith(scope): return
+                if viewName is not None and viewName.endswith(scope): return
             raise UBException('Invalid view, this command is only allowed in %s !' % str(self.viewScopes))
 
     def execute(self):
@@ -490,7 +490,7 @@ class UBCmdFind(UBCommand):
     def __init__(self, pageNo, *keywords):
         UBCommand.__init__(self)
         self.pageSize = int(ub_get_option("ub_%s_pagesize" % self.scope))
-        self.pageNo = int(pageNo is not None pageNo or 1)
+        self.pageNo = int(pageNo is not None and pageNo or 1)
         self.keywords = keywords
 
     def _preExec(self):
@@ -575,7 +575,7 @@ class UBCmdSave(UBCommand):
         self.sess.commit()
 
         if self.itemType == 'tmpl':
-            self.itemKey = name
+            self.itemKey = self.item.name
         else:
             self.itemKey = self.item.id
 
@@ -675,7 +675,7 @@ class UBCmdSend(UBCommand):
             ub_set_meta('status', self.status)
 
         saveit = ub_get_option('ub_save_after_sent')
-        if saveit is not None and saveit.isdigit() and int(saveit) == 1:
+        if '1'==vim.eval('&modified') and saveit is not None and saveit.isdigit() and int(saveit) == 1:
             ub_save_item()
         
         evt = eval("UBPostSendEvent(%s)" % self.postId)
@@ -711,7 +711,7 @@ class UBCmdOpen(UBCommand):
     '''
     def __init__(self, itemKey, itemType, scope='local', viewType=None):
         UBCommand.__init__(self)
-        self.itemKey = itemType=='tmpl' and self.itemKey.decode(self.enc) or int(itemKey)
+        self.itemKey = itemType=='tmpl' and itemKey.decode(self.enc) or int(itemKey)
         self.itemType = itemType
         self.scope = scope
         self.viewType = viewType
@@ -858,11 +858,11 @@ class UBCmdPreview(UBCommand):
             ub_send_item(self.tmpl)
 
             if ub_is_view('page_edit'):
-                prv_url = "%s?pageid=%s&preview=true"
+                prv_url = "%s?page_id=%s&preview=true"
             else:
                 prv_url = "%s?p=%s&preview=true"
 
-            prv_url = prv_url % (cfg.blogURL, ub_get_meta('post_id'))
+            prv_url = prv_url % (cfg.url, ub_get_meta('post_id'))
         else:
             template = self.sess.query(Template).filter(Template.name==self.tmpl.decode(self.enc)).first()
             if template is None:
@@ -886,12 +886,27 @@ class UBCmdDelete(UBCommand):
     def __init__(self, itemType, itemKey, scope='local'):
         UBCommand.__init__(self)
         self.itemType = itemType
-        self.itemKey = itemKey
+        self.itemKey = itemType=='tmpl' and itemKey or int(itemKey)
         self.scope = scope
+        self.itemTypeName = ub_get_item_type_name(self.itemType)
+        self.itemName = self.itemKey
+
+        self.item = None
+        if self.itemType == 'tmpl':
+            self.item = self.sess.query(Template).filter(Template.name==self.itemKey.decode(self.enc)).first()
+        elif self.scope=='local':
+            self.item = self.sess.query(Post).filter(Post.type==self.itemType).filter(Post.id==self.itemKey).first()
 
     def _preExec(self):
         UBCmdDelete.doDefault()
-        choice = vim.eval("confirm('Are you sure to delete %s %s \"%s\" ?', '&Yes\n&No')" % (self.scope, ub_get_item_type_name(self.itemType), self.itemKey))
+        # When deleting local items, check if it exists
+        if (self.scope=='local' or self.itemType=='tmpl'):
+            if self.item is None:
+                raise UBException('Cannot find %s by key value %s !' % (self.itemTypeName,self.itemKey))
+            else:
+                self.itemName = (self.itemType=='tmpl' and self.item.name or self.item.title).encode(self.enc)
+        # Ask for confirmation
+        choice = vim.eval("confirm('Are you sure to delete %s %s \"%s\" ?', '&Yes\n&No')" % (self.scope, self.itemTypeName, self.itemName))
         if choice != '1': raise UBException('Deletion canceled !')
 
     def _exec(self):
@@ -900,7 +915,6 @@ class UBCmdDelete(UBCommand):
                 self.sess.query(Template).filter(Template.name==self.itemKey.decode(self.enc)).delete()
                 UBEventQueue.fireEvent(UBTmplDelEvent(self.itemKey))
             else:
-                self.itemKey = int(self.itemKey)
                 if self.scope=='remote':
                     if self.itemType=='page':
                         api.wp.deletePage('', cfg.loginName, cfg.password, self.itemKey)
@@ -908,7 +922,7 @@ class UBCmdDelete(UBCommand):
                         api.metaWeblog.deletePost('', self.itemKey, cfg.loginName, cfg.password)
                     UBEventQueue.fireEvent(UBRemotePostDelEvent(self.itemKey))
                 else:
-                    self.sess.query(Post).filter(Post.id==self.itemKey).delete()
+                    self.sess.query(Post).filter(Post.type==self.itemType).filter(Post.id==self.itemKey).delete()
                     UBEventQueue.fireEvent(UBLocalPostDelEvent(self.itemKey))
         except Exception,e:
             self.sess.rollback()
@@ -916,8 +930,8 @@ class UBCmdDelete(UBCommand):
             raise e
         else:
             self.sess.commit()
-
-        UBEventQueue.processEvents()
+            print >> sys.stdout, '%s %s "%s" was deleted !' % (self.scope.capitalize(), self.itemTypeName, self.itemName)
+            UBEventQueue.processEvents()
 
 class UBCmdOpenItemUnderCursor(UBCommand):
     def __init__(self, viewType=None):
@@ -1073,8 +1087,8 @@ class UBCmdBlogThis(UBCommand):
         UBCommand.__init__(self, True)
 
         self.itemType = itemType
-        self.toSyntax = toSyntax is None and self.syntax or toSyntax
-        self.syntax = fromSyntax is None and self.syntax or fromSyntax
+        self.toSyntax = toSyntax is not None and toSyntax or self.syntax
+        self.syntax = fromSyntax is not None and fromSyntax or self.toSyntax
 
     def _preExec(self):
         UBCmdBlogThis.doDefault()
