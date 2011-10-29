@@ -208,7 +208,7 @@ class UBCommand(object):
         if self.viewName is not None:
             vnameParts = self.viewName.split('_')
             if ub_is_view_of_type('list'):
-                self.itemType = vnameParts[1]
+                self.itemType = vnameParts[1]=='result' and 'post' or vnameParts[1]
                 self.scope = vnameParts[0]=='search' and 'local' or vnameParts[0]
             if ub_is_view_of_type('edit'):
                 self.itemType = vnameParts[0]
@@ -567,11 +567,8 @@ class UBCmdSave(UBCommand):
     def __init__(self):
         UBCommand.__init__(self, True)
         self.item = None
-        self.itemKey = None
-        self.metaDict = None
+        self.itemKey = ub_get_meta('id')
         self.viewScopes = ['post_edit', 'page_edit', 'tmpl_edit']
-        if self.viewName is not None: self.itemType = self.viewName.split('_')[0]
-        if self.itemType in ['post', 'page']: self.metaDict = eval("ub_get_%s_meta_data()" % self.itemType)
 
     def _preExec(self):
         UBCmdSave.doDefault()
@@ -590,33 +587,31 @@ class UBCmdSave(UBCommand):
             self.itemKey = name
         else:
             self.itemKey = self.item.id
-            self.metaDict['id'] = self.itemKey
 
     def _postExec(self):
         UBCmdSave.doDefault()
 
-        ub_fill_meta_data(self.metaDict)
+        if self.itemType in ['post','page']: ub_set_meta('id', self.itemKey)
         vim.command('setl nomodified')
         
-        evt = eval("UB%sSaveEvent('%s')" % (self.itemType.capitalize(), self.itemKey));
+        evt = eval("UB%sSaveEvent('%s')" % (self.itemType=='tmpl' and 'Tmpl' or 'Post', self.itemKey));
         UBEventQueue.fireEvent(evt)
         UBEventQueue.processEvents()
 
     def __loadTmpl(self):
         '''Save the current template to local database
         '''
-        name = ub_get_meta('name').decode(self.enc)
+        self.itemKey = ub_get_meta('name').decode(self.enc)
 
         # Check if the given name is a reserved word
-        ub_check_reserved_word(name)
+        ub_check_reserved_word(self.itemKey)
 
-        tmpl = self.sess.query(Template).filter(Template.name==name).first()
+        tmpl = self.sess.query(Template).filter(Template.name==self.itemKey).first()
         if tmpl is None:
             tmpl = Template()
-            tmpl.name = name
+            tmpl.name = self.itemKey
 
-        meta_dict = ub_get_tmpl_meta_data()
-        tmpl.content = "\n".join(vim.current.buffer[len(meta_dict)+2:]).decode(self.enc)
+        tmpl.content = "\n".join(vim.current.buffer[len(ub_get_tmpl_meta_data())+2:]).decode(self.enc)
         tmpl.description = ub_get_meta('description').decode(self.enc)
 
         self.item = tmpl
@@ -624,17 +619,13 @@ class UBCmdSave(UBCommand):
     def __loadPost(self):
         '''Save the current buffer to local database
         '''
-
-        id = ub_get_meta('id')
-        post_id = ub_get_meta('post_id')
-        if id is None:
+        if self.itemKey is None:
             post = Post()
         else:
-            post = self.sess.query(Post).filter(Post.id==id).first()
+            post = self.sess.query(Post).filter(Post.id==self.itemKey).first()
 
-        meta_dict = ub_get_post_meta_data()
-        post.content = "\n".join(vim.current.buffer[len(meta_dict)+2:]).decode(self.enc)
-        post.post_id = post_id
+        post.content = "\n".join(vim.current.buffer[len(ub_get_post_meta_data())+2:]).decode(self.enc)
+        post.post_id = ub_get_meta('post_id')
         post.title = ub_get_meta('title').decode(self.enc)
         post.categories = ub_get_meta('categories').decode(self.enc)
         post.tags = ub_get_meta('tags').decode(self.enc)
@@ -647,17 +638,14 @@ class UBCmdSave(UBCommand):
     def __loadPage(self):
         '''Save the current page to local database
         '''
-        id = ub_get_meta('id')
-        post_id = ub_get_meta('post_id')
-        if id is None:
+        if self.itemKey is None:
             page = Post()
             page.type = 'page'
         else:
-            page = self.sess.query(Post).filter(Post.id==id).filter(Post.type=='page').first()
+            page = self.sess.query(Post).filter(Post.id==self.itemKey).first()
 
-        meta_dict = ub_get_page_meta_data()
-        page.content = "\n".join(vim.current.buffer[len(meta_dict)+2:]).decode(self.enc)
-        page.post_id = post_id
+        page.content = "\n".join(vim.current.buffer[len(ub_get_page_meta_data())+2:]).decode(self.enc)
+        page.post_id = ub_get_meta('post_id')
         page.title = ub_get_meta('title').decode(self.enc)
         page.slug = ub_get_meta('slug').decode(self.enc)
         page.status = ub_get_meta('status').decode(self.enc)
@@ -672,27 +660,26 @@ class UBCmdSend(UBCommand):
         UBCommand.__init__(self, True)
         self.status = status is not None and status or ub_get_meta('status')
         self.publish = ub_check_status(self.status)
-        if self.viewName is not None: self.itemType = self.viewName.split('_')[0]
         self.item = None
-        self.viewScopes = ['post_edit', 'page_edit', 'tmpl_edit'];
+        self.viewScopes = ['post_edit', 'page_edit'];
+        self.postId = ub_get_meta('post_id')
 
     def _exec(self):
         if self.itemType=='post': self.__loadPost()
         else: self.__loadPage()
 
-        post_id = ub_get_meta('post_id')
-        if post_id is None:
-            post_id = api.metaWeblog.newPost('', cfg.loginName, cfg.password, self.item, self.publish)
+        if self.postId is None:
+            self.postId = api.metaWeblog.newPost('', cfg.loginName, cfg.password, self.item, self.publish)
         else:
-            api.metaWeblog.editPost(post_id, cfg.loginName, cfg.password, self.item, self.publish)
+            api.metaWeblog.editPost(self.postId, cfg.loginName, cfg.password, self.item, self.publish)
         msg = "%s sent as %s !" % (self.itemType.capitalize(), self.status)
         print >> sys.stdout,msg
 
     def _postExec(self):
         UBCmdSend.doDefault()
 
-        if post_id != ub_get_meta('post_id'):
-            ub_set_meta('post_id', post_id)
+        if self.postId != ub_get_meta('post_id'):
+            ub_set_meta('post_id', self.postId)
         if self.status != ub_get_meta('status'):
             ub_set_meta('status', self.status)
 
@@ -700,7 +687,7 @@ class UBCmdSend(UBCommand):
         if saveit is not None and saveit.isdigit() and int(saveit) == 1:
             ub_save_item()
         
-        evt = eval("UB%sSendEvent(%s)" % (self.itemType.capitalize(), post_id))
+        evt = eval("UBPostSendEvent(%s)" % self.postId)
         UBEventQueue.fireEvent(evt)
         UBEventQueue.processEvents()
 
@@ -781,12 +768,9 @@ class UBCmdOpen(UBCommand):
         self.item = self.sess.query(Post).filter(Post.id==self.itemKey).first()
         if self.item is None: raise UBException('No post found !')
 
-        post_id = self.item.post_id
-        if post_id is None: post_id = 0
-
         self.metaData = dict(\
                 id = self.item.id,
-                post_id = post_id,
+                post_id = self.item.post_id is not None and self.item.post_id or 0,
                 title = self.item.title.encode(self.enc),
                 categories = self.item.categories.encode(self.enc),
                 tags = self.item.tags.encode(self.enc),
@@ -799,12 +783,9 @@ class UBCmdOpen(UBCommand):
         self.item = self.sess.query(Post).filter(Post.id==self.itemKey).filter(Post.type=='page').first()
         if self.item is None: raise UBException('No page found !')
 
-        post_id = self.item.post_id
-        if post_id is None: post_id = 0
-
         self.metaData = dict(\
                 id = self.item.id,
-                post_id = post_id,
+                post_id = self.item.post_id is not None and self.item.post_id or 0,
                 title = self.item.title.encode(self.enc),
                 slug = self.item.slug.encode(self.enc),
                 status = self.item.status.encode(self.enc))
@@ -831,10 +812,8 @@ class UBCmdOpen(UBCommand):
                 self.sess.add(self.item)
                 self.sess.commit()
 
-        id = self.item.id
-        if self.item.id is None: id = 0
         self.metaData = dict(\
-                id = id,
+                id = self.item.id is not None and self.item.id or 0,
                 post_id = self.item.post_id,
                 title = self.item.title.encode(self.enc),
                 categories = self.item.categories.encode(self.enc),
@@ -863,10 +842,8 @@ class UBCmdOpen(UBCommand):
                 self.sess.add(self.item)
                 self.sess.commit()
 
-        id = self.item.id
-        if id is None: id = 0
         self.metaData = dict(\
-                id = id,
+                id = self.item.id is not None and self.item.id or 0,
                 post_id = self.item.post_id,
                 title = self.item.title.encode(self.enc),
                 slug = self.item.slug.encode(self.enc),
@@ -983,20 +960,28 @@ class UBCmdDelItemUnderCursor(UBCommand):
     def __init__(self):
         UBCommand.__init__(self)
         self.viewScopes = ['list']
+        self.postId = None
 
         lineParts = vim.current.line.split()
         if ub_is_cursorline_valid('template'):
             self.itemKey = lineParts[0]
         elif ub_is_cursorline_valid('general'):
-            if self.scope == 'local':
-                self.itemKey = int(lineParts[0])
-                self.itemType = self.sess.query(Post.type).filter(Post.id==self.itemKey).first()[0]
-            else:
-                self.itemKey = int(lineParts[1])
+            self.itemKey = int(lineParts[0])
+            self.postId = int(lineParts[1])
+            rslt = self.sess.query(Post.type).filter(
+                    or_(
+                        and_(Post.id>0, Post.id==self.itemKey), 
+                        and_(Post.post_id>0, Post.post_id==self.postId)
+                    )
+                ).first()
+            self.itemType = rslt is not None and rslt[0] or self.itemType
         else: raise UBException('This is not an item !')
 
     def _exec(self):
-        ub_del_item(self.itemType, self.itemKey, self.scope)
+        if ub_is_id(self.itemKey, True) or self.itemType=='tmpl':
+            ub_del_item(self.itemType, self.itemKey, 'local')
+        if ub_is_id(self.postId, True):
+            ub_del_item(self.itemType, self.postId, 'remote')
 
 class UBCmdNew(UBCommand):
     def __init__(self, itemType='post', mixed='markdown'):
