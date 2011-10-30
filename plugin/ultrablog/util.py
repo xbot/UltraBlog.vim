@@ -495,8 +495,7 @@ def ub_get_content():
     else:
         return "\n".join(vim.current.buffer[:])
 
-    content = "\n".join(vim.current.buffer[len(meta_dict)+2:])
-    return content
+    return "\n".join(vim.current.buffer[len(meta_dict)+2:])
 
 def ub_set_content(lines):
     '''Set the given lines to the content area of the current buffer
@@ -509,7 +508,7 @@ def ub_set_content(lines):
     elif ub_is_view('tmpl_edit'):
         meta_dict = ub_get_tmpl_meta_data()
 
-    idx = meta_dict and len(meta_dict)+2 or 0
+    idx = meta_dict is not None and len(meta_dict)+2 or 0
     del vim.current.buffer[idx:]
     vim.current.buffer.append(lines, idx)
     return True

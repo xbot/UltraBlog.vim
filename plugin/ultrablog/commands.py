@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 
 import vim, xmlrpclib, webbrowser, sys, re, tempfile, os, mimetypes, inspect, types
 from exceptions import *
@@ -57,37 +58,8 @@ def ub_find(page_no, *keywords):
 def ub_refresh_current_view():
     ''' Refresh current view
     '''
-    if ub_is_ubbuf('%'):
-        vname = ub_get_viewname('%')
-        if vname == 'search_result_list':
-            kws = ub_get_bufvar('ub_keywords')
-            pno = ub_get_bufvar('page_no')
-            ub_find(pno, *kws)
-        elif ub_is_view_of_type('list'):
-            vinfo = vname.split('_')
-            psize = ub_get_bufvar('page_size')
-            pno = ub_get_bufvar('page_no')
-            ub_list_items(vinfo[1], vinfo[0], psize, pno)
-        elif ub_is_view_of_type('edit'):
-            id = ub_get_meta('id')
-            id = (id is not None and id) or ub_get_meta('name')
-            if ub_is_id(id) or not ub_is_emptystr(id):
-                modified = '1'==vim.eval('&modified')
-                vim.command('setl nomodified')
-                vinfo = vname.split('_')
-                try:
-                    ub_open_item(vinfo[0], id, 'local')
-                except Exception, e:
-                    if modified is True:
-                        vim.command('setl modified')
-                    else:
-                        vim.command('setl nomodified')
-                    print >> sys.stderr,str(e)
-            else:
-                raise UBException('Key of current buffer cannot be found !')
-        else:
-            print >> sys.stderr,'Not implemented !'
-            return
+    cmd = UBCmdRefresh()
+    cmd.execute()
 
 @__ub_exception_handler
 def ub_preview(tmpl=None):
@@ -906,7 +878,7 @@ class UBCmdDelete(UBCommand):
             else:
                 self.itemName = (self.itemType=='tmpl' and self.item.name or self.item.title).encode(self.enc)
         # Ask for confirmation
-        choice = vim.eval("confirm('Are you sure to delete %s %s \"%s\" ?', '&Yes\n&No')" % (self.scope, self.itemTypeName, self.itemName))
+        choice = vim.eval("confirm('Are you sure to delete %s %s \"%s\" ?', '&Yes\n&No')" % (self.scope.encode(self.enc), self.itemTypeName.encode(self.enc), self.itemName))
         if choice != '1': raise UBException('Deletion canceled !')
 
     def _exec(self):
@@ -930,8 +902,8 @@ class UBCmdDelete(UBCommand):
             raise e
         else:
             self.sess.commit()
-            print >> sys.stdout, '%s %s "%s" was deleted !' % (self.scope.capitalize(), self.itemTypeName, self.itemName)
             UBEventQueue.processEvents()
+            print >> sys.stdout, '%s %s "%s" was deleted !' % (self.scope.capitalize().encode(self.enc), self.itemTypeName.encode(self.enc), self.itemName)
 
 class UBCmdOpenItemUnderCursor(UBCommand):
     def __init__(self, viewType=None):
@@ -1107,7 +1079,7 @@ class UBCmdConvert(UBCommand):
     def __init__(self, toSyntax, fromSyntax=None):
         UBCommand.__init__(self, True)
         self.toSyntax = toSyntax
-        if fromSyntax is not None: self.syntax = fromSyntax
+        self.syntax = fromSyntax is not None and fromSyntax or self.syntax
 
     def _preExec(self):
         UBCmdConvert.doDefault()
@@ -1118,4 +1090,35 @@ class UBCmdConvert(UBCommand):
         content = ub_convert_str(content, self.syntax, self.toSyntax, self.enc)
         ub_set_content(content.split("\n"))
         vim.command('setl filetype=%s' % self.toSyntax)
+
+class UBCmdRefresh(UBCommand):
+    def __init__(self):
+        UBCommand.__init__(self)
+        self.viewScopes = ['list','edit']
+
+    def _preExec(self):
+        UBCmdRefresh.doDefault()
+
+    def _exec(self):
+        if self.viewName == 'search_result_list':
+            kws = ub_get_bufvar('ub_keywords')
+            pno = ub_get_bufvar('page_no')
+            ub_find(pno, *kws)
+        elif ub_is_view_of_type('list'):
+            psize = ub_get_bufvar('page_size')
+            pno = ub_get_bufvar('page_no')
+            ub_list_items(self.itemType, self.scope, psize, pno)
+        elif ub_is_view_of_type('edit'):
+            itemKey = self.itemType=='tmpl' and ub_get_meta('name') or ub_get_meta('id')
+            if itemKey is not None:
+                modified = '1'==vim.eval('&modified')
+                vim.command('setl nomodified')
+                try:
+                    ub_open_item(self.itemType, itemKey, 'local')
+                except Exception, e:
+                    vcmd = modified is True and 'setl modified' or 'setl nomodified'
+                    vim.command(vcmd)
+                    print >> sys.stderr,str(e)
+            else:
+                raise UBException('Cannot find key value of the current buffer !')
 
