@@ -284,18 +284,23 @@ class UBCmdList(UBCommand):
 
     def _preExec(self):
         UBCmdList.doDefault()
-        # Check self.pageNo
-        self.pageNo = int(self.pageNo)
-        if self.pageNo<1:
-            raise UBException('Page NO. cannot be less than 1 !')
-        # Check self.pageSize
-        self.pageSize = int(self.pageSize)
-        if self.pageSize<1:
-            raise UBException('Illegal page size (%s) !' % self.pageSize)
+        if self.pageNo<1: raise UBException('Page NO. cannot be less than 1 !')
+        if self.pageSize<1: raise UBException('Illegal page size (%s) !' % self.pageSize)
 
     def _exec(self):
         if self.itemType=='tmpl': self._listTemplates()
         else: eval("self._list%s%ss()" % (self.scope.capitalize(), self.itemType.capitalize()))
+
+    def _postExec(self):
+        UBCmdList.doDefault()
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
+        vim.command('call UBClearUndo()')
+        vim.command('setl nomodified')
+        vim.command("setl nomodifiable")
+        vim.current.window.cursor = (2, 0)
 
     def _listLocalPosts(self):
         '''List local posts stored in database
@@ -330,16 +335,8 @@ class UBCmdList(UBCommand):
 
         vim.command("let b:page_no=%s" % self.pageNo)
         vim.command("let b:page_size=%s" % self.pageSize)
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
         vim.command("map <buffer> "+ub_get_option('ub_hotkey_pagedown')+" :py ub_list_items('post', 'local', %d, %d)<cr>" % (self.pageSize, self.pageNo+1))
         vim.command("map <buffer> "+ub_get_option('ub_hotkey_pageup')+" :py ub_list_items('post', 'local', %d, %d)<cr>" % (self.pageSize, self.pageNo-1))
-        vim.command('call UBClearUndo()')
-        vim.command('setl nomodified')
-        vim.command("setl nomodifiable")
-        vim.current.window.cursor = (2, 0)
 
     def _listRemotePosts(self):
         '''List remote posts stored in the blog
@@ -359,14 +356,6 @@ class UBCmdList(UBCommand):
         vim.current.buffer.append([(tmpl % (post['id'],post['postid'],post['post_status'],post['title'])).encode(self.enc) for post in posts])
 
         vim.command("let b:page_size=%s" % self.pageSize)
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
-        vim.command('call UBClearUndo()')
-        vim.command('setl nomodified')
-        vim.command("setl nomodifiable")
-        vim.current.window.cursor = (2, 0)
 
     def _listLocalPages(self):
         '''List local pages stored in database
@@ -398,15 +387,6 @@ class UBCmdList(UBCommand):
         tmpl = ub_get_list_template()
         vim.current.buffer.append([(tmpl % (page.id,page.post_id,page.status,page.title)).encode(self.enc) for page in pages])
 
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
-        vim.command('call UBClearUndo()')
-        vim.command('setl nomodified')
-        vim.command("setl nomodifiable")
-        vim.current.window.cursor = (2, 0)
-
     def _listRemotePages(self):
         '''List remote pages stored in the blog
         '''
@@ -424,15 +404,6 @@ class UBCmdList(UBCommand):
         tmpl = ub_get_list_template()
         vim.current.buffer.append([(tmpl % (page['id'],page['page_id'],page['page_status'],page['title'])).encode(self.enc) for page in pages])
 
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
-        vim.command('call UBClearUndo()')
-        vim.command('setl nomodified')
-        vim.command("setl nomodifiable")
-        vim.current.window.cursor = (2, 0)
-
     def _listTemplates(self):
         '''List preview templates
         '''
@@ -447,15 +418,6 @@ class UBCmdList(UBCommand):
         line = "%-24s%s"
         vim.current.buffer.append([(line % (tmpl.name,tmpl.description)).encode(self.enc) for tmpl in tmpls])
 
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
-        vim.command('call UBClearUndo()')
-        vim.command('setl nomodified')
-        vim.command("setl nomodifiable")
-        vim.current.window.cursor = (2, 0)
-
 class UBCmdFind(UBCommand):
     ''' Context search
     '''
@@ -467,14 +429,8 @@ class UBCmdFind(UBCommand):
 
     def _preExec(self):
         UBCmdFind.doDefault()
-        # Check self.pageNo
-        self.pageNo = int(self.pageNo)
-        if self.pageNo<1:
-            raise UBException('Page NO. cannot be less than 1 !')
-        # Check self.pageSize
-        self.pageSize = int(self.pageSize)
-        if self.pageSize<1:
-            raise UBException('Illegal page size (%s) !' % self.pageSize)
+        if self.pageNo<1: raise UBException('Page NO. cannot be less than 1 !')
+        if self.pageSize<1: raise UBException('Illegal page size (%s) !' % self.pageSize)
 
     def _exec(self):
         posts = []
@@ -539,29 +495,22 @@ class UBCmdSave(UBCommand):
         if vim.eval('&modified')=='0': raise UBException('This buffer has not been modified !')
 
     def _exec(self):
-        if self.itemType=='post': self.__loadPost()
-        elif self.itemType=='page': self.__loadPage()
-        else: self.__loadTmpl()
-
+        eval('self._load%s()' % self.itemType.capitalize())
         self.sess.add(self.item)
         self.sess.commit()
-
-        if self.itemType == 'tmpl':
-            self.itemKey = self.item.name
-        else:
-            self.itemKey = self.item.id
+        self.itemKey = self.item.getKey(self.enc)
 
     def _postExec(self):
         UBCmdSave.doDefault()
 
-        if self.itemType in ['post','page']: ub_set_meta('id', self.itemKey)
+        ub_set_meta(self.item.getKeyProperty(), self.itemKey)
         vim.command('setl nomodified')
         
         evt = eval("UB%sSaveEvent('%s')" % (self.itemType=='tmpl' and 'Tmpl' or 'Post', self.itemKey));
         UBEventQueue.fireEvent(evt)
         UBEventQueue.processEvents()
 
-    def __loadTmpl(self):
+    def _loadTmpl(self):
         '''Save the current template to local database
         '''
         self.itemKey = ub_get_meta('name').decode(self.enc)
@@ -579,7 +528,7 @@ class UBCmdSave(UBCommand):
 
         self.item = tmpl
 
-    def __loadPost(self):
+    def _loadPost(self):
         '''Save the current buffer to local database
         '''
         if self.itemKey is None:
@@ -598,7 +547,7 @@ class UBCmdSave(UBCommand):
 
         self.item = post
 
-    def __loadPage(self):
+    def _loadPage(self):
         '''Save the current page to local database
         '''
         if self.itemKey is None:
@@ -628,9 +577,7 @@ class UBCmdSend(UBCommand):
         self.postId = ub_get_meta('post_id')
 
     def _exec(self):
-        if self.itemType=='post': self.__loadPost()
-        else: self.__loadPage()
-
+        eval('self._load%s()' % self.itemType.capitalize())
         if self.postId is None:
             self.postId = api.metaWeblog.newPost('', cfg.loginName, cfg.password, self.item, self.publish)
         else:
@@ -654,7 +601,7 @@ class UBCmdSend(UBCommand):
         UBEventQueue.fireEvent(evt)
         UBEventQueue.processEvents()
 
-    def __loadPost(self):
+    def _loadPost(self):
         '''Send the current buffer to the blog
         '''
         self.item = dict(\
@@ -667,7 +614,7 @@ class UBCmdSend(UBCommand):
             post_status = self.status
         )
 
-    def __loadPage(self):
+    def _loadPage(self):
         '''Send the current page to the blog
         '''
         self.item = dict(\
@@ -692,20 +639,9 @@ class UBCmdOpen(UBCommand):
         self.item = None
 
     def _exec(self):
-        if self.scope=='local':
-            if self.itemType=='post':
-                self.__openLocalPost()
-            elif self.itemType=='page':
-                self.__openLocalPage()
-            else:
-                self.__openLocalTmpl()
-        else:
-            if self.itemType=='post':
-                self.__openRemotePost()
-            else:
-                self.__openRemotePage()
-
+        eval("self._load%s%s()" % (self.scope.capitalize(), self.itemType.capitalize()))
         ub_wise_open_view('%s_edit' % self.itemType, self.viewType)
+        self.metaData = self.item.getMetaDict(self.enc)
         ub_fill_meta_data(self.metaData)
         vim.current.buffer.append(self.item.content.encode(self.enc).split("\n"))
 
@@ -718,35 +654,19 @@ class UBCmdOpen(UBCommand):
         if self.itemType=='tmpl' or ub_is_id(self.item.id): vim.command('setl nomodified')
         vim.current.window.cursor = (len(self.metaData)+3, 0)
 
-    def __openLocalPost(self):
+    def _loadLocalPost(self):
         '''Open local post
         '''
         self.item = self.sess.query(Post).filter(Post.id==self.itemKey).first()
         if self.item is None: raise UBException('No post found !')
 
-        self.metaData = dict(\
-                id = self.item.id,
-                post_id = self.item.post_id is not None and self.item.post_id or 0,
-                title = self.item.title.encode(self.enc),
-                categories = self.item.categories.encode(self.enc),
-                tags = self.item.tags.encode(self.enc),
-                slug = self.item.slug.encode(self.enc),
-                status = self.item.status.encode(self.enc))
-
-    def __openLocalPage(self):
+    def _loadLocalPage(self):
         '''Open local page
         '''
         self.item = self.sess.query(Post).filter(Post.id==self.itemKey).filter(Post.type=='page').first()
         if self.item is None: raise UBException('No page found !')
 
-        self.metaData = dict(\
-                id = self.item.id,
-                post_id = self.item.post_id is not None and self.item.post_id or 0,
-                title = self.item.title.encode(self.enc),
-                slug = self.item.slug.encode(self.enc),
-                status = self.item.status.encode(self.enc))
-
-    def __openRemotePost(self):
+    def _loadRemotePost(self):
         '''Open remote post
         '''
         self.item = self.sess.query(Post).filter(Post.post_id==self.itemKey).first()
@@ -768,16 +688,7 @@ class UBCmdOpen(UBCommand):
                 self.sess.add(self.item)
                 self.sess.commit()
 
-        self.metaData = dict(\
-                id = self.item.id is not None and self.item.id or 0,
-                post_id = self.item.post_id,
-                title = self.item.title.encode(self.enc),
-                categories = self.item.categories.encode(self.enc),
-                tags = self.item.tags.encode(self.enc),
-                slug = self.item.slug.encode(self.enc),
-                status = self.item.status.encode(self.enc))
-
-    def __openRemotePage(self):
+    def _loadRemotePage(self):
         '''Open remote page
         '''
         self.item = self.sess.query(Post).filter(Post.post_id==self.itemKey).filter(Post.type=='page').first()
@@ -798,23 +709,12 @@ class UBCmdOpen(UBCommand):
                 self.sess.add(self.item)
                 self.sess.commit()
 
-        self.metaData = dict(\
-                id = self.item.id is not None and self.item.id or 0,
-                post_id = self.item.post_id,
-                title = self.item.title.encode(self.enc),
-                slug = self.item.slug.encode(self.enc),
-                status = self.item.status.encode(self.enc))
-
-    def __openLocalTmpl(self):
+    def _loadLocalTmpl(self):
         '''Open template
         '''
         self.item = self.sess.query(Template).filter(Template.name==self.itemKey).first()
         if self.item is None: raise UBException('No template found !')
         self.item.syntax = 'html'
-
-        self.metaData = dict(\
-                name = self.item.name.encode(self.enc),
-                description = self.item.description.encode(self.enc))
 
 class UBCmdPreview(UBCommand):
     ''' Preview command
@@ -876,7 +776,7 @@ class UBCmdDelete(UBCommand):
             if self.item is None:
                 raise UBException('Cannot find %s by key value %s !' % (self.itemTypeName,self.itemKey))
             else:
-                self.itemName = (self.itemType=='tmpl' and self.item.name or self.item.title).encode(self.enc)
+                self.itemName = self.item.getName(self.enc)
         # Ask for confirmation
         choice = vim.eval("confirm('Are you sure to delete %s %s \"%s\" ?', '&Yes\n&No')" % (self.scope.encode(self.enc), self.itemTypeName.encode(self.enc), self.itemName))
         if choice != '1': raise UBException('Deletion canceled !')
@@ -964,60 +864,41 @@ class UBCmdNew(UBCommand):
             self.syntax = 'html'
 
     def _exec(self):
-        if self.itemType=='post':
-            self.__createNewPost()
-        elif self.itemType=='page':
-            self.__createNewPage()
-        else:
-            self.__createNewTmpl()
+        eval('self._createNew%s()' % self.itemType.capitalize())
 
-    def __createNewPost(self):
-        post_meta_data = dict(\
-                id = str(0),
-                post_id = str(0),
-                title = '',
-                categories = self.__getCategories(),
-                tags = '',
-                slug = '',
-                status = 'draft')
+    def _createNewPost(self):
+        item = Post()
+        metaData = item.getMetaDict()
+        metaData['categories'] = self.__getCategories()
+        metaData['status'] = 'draft'
 
         ub_wise_open_view('post_edit')
-        ub_fill_meta_data(post_meta_data)
+        ub_fill_meta_data(metaData)
         self.__appendPromotionLink()
 
-    def __createNewPage(self):
-        page_meta_data = dict(\
-                id = str(0),
-                post_id = str(0),
-                title = '',
-                slug = '',
-                status = 'draft')
+    def _createNewPage(self):
+        item = Post()
+        item.type = 'page'
+        metaData = item.getMetaDict()
+        metaData['status'] = 'draft'
 
         ub_wise_open_view('page_edit')
-        ub_fill_meta_data(page_meta_data)
+        ub_fill_meta_data(metaData)
 
-    def __createNewTmpl(self):
+    def _createNewTmpl(self):
         # Check if the given name is a reserved word
-        try:
-            ub_check_status(self.syntax)
-        except UBException:
-            pass
-        else:
-            raise UBException("'%s' is a reserved word !" % self.syntax)
-
+        ub_check_reserved_word(self.itemKey)
         # Check if the given name is already existing
-        if self.sess.query(Template).filter(Template.name==self.syntax.decode(self.enc)).first() is not None:
+        if self.sess.query(Template).filter(Template.name==self.itemKey.decode(self.enc)).first() is not None:
             self.sess.close()
-            raise UBException('Template "%s" exists !' % self.syntax)
+            raise UBException('Template "%s" exists !' % self.itemKey)
 
-        meta_data = dict(\
-                name = self.syntax,
-                description = '')
-
+        item = Template()
+        metaData = item.getMetaDict()
+        metaData['name'] = self.itemKey
         ub_wise_open_view('tmpl_edit')
-        ub_fill_meta_data(meta_data)
-        fw = \
-'''<html>
+        ub_fill_meta_data(metaData)
+        fw = '''<html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>%(title)s</title>
@@ -1043,7 +924,7 @@ class UBCmdNew(UBCommand):
 
     def __getCategories(self):
         cats = api.metaWeblog.getCategories('', cfg.loginName, cfg.password)
-        return ', '.join([cat['description'].encode('utf-8') for cat in cats])
+        return ', '.join([cat['description'].encode(self.enc) for cat in cats])
 
     def __appendPromotionLink(self):
         doit = ub_get_option('ub_append_promotion_link')
@@ -1095,9 +976,6 @@ class UBCmdRefresh(UBCommand):
     def __init__(self):
         UBCommand.__init__(self)
         self.viewScopes = ['list','edit']
-
-    def _preExec(self):
-        UBCmdRefresh.doDefault()
 
     def _exec(self):
         if self.viewName == 'search_result_list':

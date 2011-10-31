@@ -14,7 +14,15 @@ try:
     Base = declarative_base()
     Session = sessionmaker()
 
-    class Post(Base):
+    class Item(object):
+        def getKey(self, encoding=None): pass
+        def getName(self, encoding=None): pass
+        def getKeyProperty(self): pass
+        def getNameProperty(self): pass
+        def getMetaDict(self, encoding=None): pass
+        def _encode(self, val, encoding): return encoding is not None and val.encode(encoding) or val
+
+    class Post(Base,Item):
         __tablename__ = 'post'
 
         id = Column('id', Integer, primary_key=True)
@@ -28,12 +36,45 @@ try:
         type = Column('type', String(32), nullable=False, default='post')
         status = Column('status', String(32), nullable=False, default='draft')
 
-    class Template(Base):
+        def getKey(self, encoding=None):
+            return self.id
+        def getName(self, encoding=None):
+            return encoding is not None and self.title.encode(encoding) or self.title
+        def getKeyProperty(self):
+            return 'id'
+        def getNameProperty(self):
+            return 'title'
+        def getMetaDict(self, encoding=None):
+            meta = dict(\
+                id = self.id is not None and self.id or 0,
+                post_id = self.post_id is not None and self.post_id or 0,
+                title = self.title is not None and self._encode(self.title, encoding) or '',
+                categories = self.categories is not None and self._encode(self.categories, encoding) or '',
+                tags = self.tags is not None and self._encode(self.tags, encoding) or '',
+                slug = self.slug is not None and self._encode(self.slug, encoding) or '',
+                status = self.status is not None and self._encode(self.status, encoding) or '')
+            if self.type=='page': del meta['categories'], meta['tags']
+            return meta
+
+    class Template(Base,Item):
         __tablename__ = 'template'
 
         name = Column('name', String(32), primary_key=True)
         description = Column('description', String(256))
         content = Column('content', Text)
+
+        def getKey(self, encoding=None):
+            return self._encode(self.name, encoding)
+        def getName(self, encoding=None):
+            return self._encode(self.name, encoding)
+        def getKeyProperty(self):
+            return 'name'
+        def getNameProperty(self):
+            return 'name'
+        def getMetaDict(self, encoding=None):
+            return dict(\
+                name = self.name is not None and self._encode(self.name, encoding) or '',
+                description = self.description is not None and self._encode(self.description, encoding) or '')
 
 except ImportError, e:
     sqlalchemy = None
@@ -41,8 +82,7 @@ except ImportError, e:
     Session = None
     Post = None
     Template = None
-except Exception:
-    pass
+except:pass
 
 def ub_upgrade():
     if db is not None:

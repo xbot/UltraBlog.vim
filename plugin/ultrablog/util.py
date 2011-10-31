@@ -61,12 +61,9 @@ def ub_check_status(status):
 def ub_check_reserved_word(rw):
     ''' Check if the given parameter is a reserved word
     '''
-    try:
-        ub_check_status(rw)
-    except UBException:
-        pass
-    else:
-        raise UBException("'%s' is a reserved word !" % rw)
+    try: ub_check_status(rw)
+    except UBException: pass
+    else: raise UBException("'%s' is a reserved word !" % rw)
 
 def ub_is_valid_syntax(syntax):
     '''Check if the given parameter is one of the supported syntaxes
