@@ -530,7 +530,11 @@ ub_default_template                                       *ub_default_template*
   Bugs                                                         *UltraBlog_Bugs*
 ==============================================================================
 
-If you discover any bugs not listed here, please contact the |UltraBlog_Author|
+If you discover any bugs not listed here, please contact the |UltraBlog_Author|.
+
+Or submit issues with Github's issues tracker:
+
+    https://github.com/xbot/UltraBlog.vim/issues
 
 ==============================================================================
   History                                                   *UltraBlog_History*
