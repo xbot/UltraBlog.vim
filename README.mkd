@@ -7,7 +7,7 @@ The biggest difference between UB and other similar scripts is that UB is an ult
 
 For those who just needs a lightweight blog editor similar as other Vim blogging scripts, UB also comes with an Editor Mode, which doesn't create a database and store data in it.
 
-In addition, UB is tending to make life easy for writing posts with many kinds of lightweight markup languages, currently the following kinds are supported: Markdown, reStructuredText, LaTeX, Textile and of cause HTML.
+In addition, UB is tending to make life easier for writing posts with many kinds of lightweight markup languages, currently the following kinds are supported: Markdown, reStructuredText, LaTeX, Textile and of cause HTML.
 
 Enjoy Vim blogging !
 

@@ -6,8 +6,8 @@
 Author:      Lenin Lee   lenin.lee at gmail dot com       *UltraBlog_Author*
 URL:         http://sinolog.it/?p=1894                    *UltraBlog_URL*
 Description: Ultimate vim blogging plugin.                |UltraBlog_Motivation|
-Version:     3.0.0                                        |UltraBlog_History|
-License:     Copyleft                                     |UltraBlog_License|
+Version:     3.1.0                                        |UltraBlog_History|
+License:     New BSD                                      |UltraBlog_License|
 Contribute:  Please report any bugs or suggestions        |UltraBlog_Bugs|
              to the address above.                        |UltraBlog_Future|
 
@@ -36,26 +36,25 @@ Contribute:  Please report any bugs or suggestions        |UltraBlog_Bugs|
   Motivation                                             *UltraBlog_Motivation*
 ==============================================================================
 
-The biggest difference between UltraBlog.vim and other Vim blogging scripts is 
-that UltraBlog.vim supplies two modes: the first one is editor mode, in which 
-users can manage posts and pages in their blogs, just like other Vim blogging
-scripts; the second is client mode, in which posts and pages are stored in a 
-local SQLite database, in this way, it does not only OPERATE on posts/pages in 
-blogs but also MANAGE them locally. So UltraBlog.vim is an integrated blogging 
-client more than just a blog editor.
+UltraBlog.vim is yet another Vim blogging script for Wordpress.
 
-You will find UltraBlog.vim very useful when you write posts in some light 
-weight markup languages, such as Markdown, LaTeX, reStructuredText and Textile. 
-With posts/pages stored locally, you can edit them in any light weight markup
-language at any time even after a long time when they were published, and update 
-the online copies in HTML syntax. 
+The biggest difference between UB and other similar scripts is that UB is an 
+ultimate client, which stores posts locally in an SQLite database, while others 
+just operate remotely. In this way, many things can be done easily by the 
+advantage of local storage and many other utilities, for example, you can search 
+for posts stored in the database with a few keywords by typing a simple command, 
+also you can preview drafts with any of your favorite templates as soon as you 
+want to.
 
-This is the exact original intention for which I wrote UltraBlog.vim. After 
-years of blogging, I've formed the habbit of writing posts in Markdown 
-syntax to save time, and I think it is good to always keep my posts updated, 
-rather than post it and forget it. But I found it hard to update the posted 
-copies after modifying the local Markdown source files with other Vim blogging 
-plugins except UltraBlog.vim.
+For those who just needs a lightweight blog editor similar as other Vim blogging 
+scripts, UB also comes with an Editor Mode, which doesn't create a database and 
+store data in it.
+
+In addition, UB is tending to make life easier for writing posts with many kinds 
+of lightweight markup languages, currently the following kinds are supported: 
+Markdown, reStructuredText, LaTeX, Textile and of cause HTML.
+
+Enjoy Vim blogging !
 
 ==============================================================================
   Features                                                 *UltraBlog_Features*
@@ -668,7 +667,7 @@ If you discover any bugs not listed here, please contact the |UltraBlog_Author|
   License                                                   *UltraBlog_License*
 ==============================================================================
 
-Copyleft 2011
+The New BSD License
 
 ==============================================================================
 vim:tw=78:ts=4:ft=help:norl:fdm=marker
