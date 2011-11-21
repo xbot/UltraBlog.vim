@@ -2,13 +2,6 @@
 
 import vim,re,types,os
 from exceptions import *
-try:
-    import markdown
-except ImportError:
-    try:
-        import markdown2 as markdown
-    except ImportError:
-        markdown = None
 
 def ub_wise_open_view(view_name=None, view_type=None):
     '''Wisely decide whether to wipe out the content of current buffer 
@@ -517,10 +510,26 @@ def ub_convert_str(content, from_syntax, to_syntax, encoding=None):
         return content
 
     if from_syntax == 'markdown' and to_syntax == 'html':
+        try:
+            import markdown
+        except ImportError:
+            try:
+                import markdown2 as markdown
+            except ImportError:
+                raise UBException('Missing module: python-markdown or python-markdown2 !')
         if encoding is not None:
             new_content = markdown.markdown(content.decode(encoding)).encode(encoding)
         else:
             new_content = markdown.markdown(content)
+    elif from_syntax == 'html' and to_syntax == 'markdown':
+        try:
+            import html2text
+        except ImportError:
+            raise UBException('Missing module: python-html2text !')
+        if encoding is not None:
+            new_content = html2text.html2text(content.decode(encoding)).encode(encoding)
+        else:
+            new_content = html2text.html2text(content)
     else:
         cmd_parts = []
         cmd_parts.append(ub_get_option('ub_converter_command'))

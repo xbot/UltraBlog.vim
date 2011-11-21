@@ -155,12 +155,16 @@ UltraBlog.vim requires the following softwares to work normally:
     * Vim with python support enabled
     * SQLAlchemy 0.7 or newer
     + python-markdown or python-markdown2
+    + python-html2text
     + pandoc or other
 
 The asterisk items are required at any condition.
 
 One of the two markdown modules of python is needed if you want to convert 
 posts/pages from Markdown to HTML.
+
+The python-html2text module is needed when converts buffers from HTML to
+Markdown.
 
 pandoc is requried when you need to do conversions between any pair of the 
 avaliable syntaxes. You can also specify you own external command as the 
@@ -307,10 +311,15 @@ All keymappings can be customized by setting some options, refer to
     Refer to |UltraBlog_Syntaxes|.
 
     If you only need to convert from Markdown to HTML, only python-markdown or
-    python-markdown2 module is required. For other conversion scenarios, you 
-    must install pacdoc or use the options: |ub_converter_command|, 
-    |ub_converter_options|, |ub_converter_option_from|,
-    |ub_converter_option_to| to specify a valid external command.
+    python-markdown2 module is required.
+
+    If you need to do conversion from HTML to Markdown, you need to install
+    python-html2text.
+
+    For other conversion scenarios, you must install pacdoc or use the 
+    options: |ub_converter_command|, |ub_converter_options|,
+    |ub_converter_option_from|, |ub_converter_option_to| to specify a valid 
+    external command.
 
 :UBRefresh                                                         *:UBRefresh*
     Refresh the current buffer.
@@ -539,6 +548,10 @@ Or submit issues with Github's issues tracker:
 ==============================================================================
   History                                                   *UltraBlog_History*
 ==============================================================================
+
+x.x.x
+    * Change:  |:UBConv| now depends on the python-html2text module when
+               converts buffers from HTML to Markdown.
 
 3.1.0
     * Change:  The key "xmlrpc" of the settings list is dropped, a new one
