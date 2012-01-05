@@ -41,6 +41,8 @@ Author
 * http://0x3f.org
 * https://twitter.com/leninlee
 * https://github.com/xbot
+* http://0x3f.org/?p=1894
+* http://www.vim.org/scripts/script.php?script_id=3532
 
 License
 --------
