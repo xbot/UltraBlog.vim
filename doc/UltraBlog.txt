@@ -4,7 +4,7 @@
 ==============================================================================
 
 Author:      Lenin Lee   lenin.lee at gmail dot com       *UltraBlog_Author*
-URL:         http://sinolog.it/?p=1894                    *UltraBlog_URL*
+URL:         http://0x3f.org/?p=1894                      *UltraBlog_URL*
 Description: Ultimate vim blogging plugin.                |UltraBlog_Motivation|
 Version:     3.1.0                                        |UltraBlog_History|
 License:     New BSD                                      |UltraBlog_License|
@@ -549,9 +549,10 @@ Or submit issues with Github's issues tracker:
   History                                                   *UltraBlog_History*
 ==============================================================================
 
-x.x.x
+3.2.0
     * Change:  |:UBConv| now depends on the python-html2text module when
                converts buffers from HTML to Markdown.
+    * Change:  Change the domain name of my site to the new 0x3f.org.
 
 3.1.0
     * Change:  The key "xmlrpc" of the settings list is dropped, a new one

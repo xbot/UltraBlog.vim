@@ -24,7 +24,7 @@ Features
 Tips
 --------
 
-* [Enable Code Snippet Highlighting For UltraBlog.vim Templates](http://sinolog.it/?p=2103)
+* [Enable Code Snippet Highlighting For UltraBlog.vim Templates](http://0x3f.org/?p=2103)
 
 Bug tracker
 --------
@@ -38,7 +38,7 @@ Author
 
 **Lenin Lee**
 
-* http://sinolog.it
+* http://0x3f.org
 * https://twitter.com/leninlee
 * https://github.com/xbot
 
