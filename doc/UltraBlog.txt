@@ -549,6 +549,10 @@ Or submit issues with Github's issues tracker:
   History                                                   *UltraBlog_History*
 ==============================================================================
 
+3.x
+    * Bugfix:  Exception raised when one event is processed by more than one
+               event handlers.
+
 3.2.0
     * Change:  |:UBConv| now depends on the python-html2text module when
                converts buffers from HTML to Markdown.

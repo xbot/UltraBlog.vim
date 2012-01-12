@@ -10,10 +10,10 @@ class UBEventQueue:
 
     @classmethod
     def processEvents(cls):
-        for evt in cls.queue:
+        while len(cls.queue)>=0:
+            evt = cls.queue.pop()
             for listener in cls.listeners:
                 if listener.isTarget(evt):
-                    cls.queue.remove(evt)
                     listener.processEvent(evt)
 
     @classmethod
