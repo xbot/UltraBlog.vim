@@ -10,7 +10,7 @@ class UBEventQueue:
 
     @classmethod
     def processEvents(cls):
-        while len(cls.queue)>=0:
+        while len(cls.queue)>0:
             evt = cls.queue.pop()
             for listener in cls.listeners:
                 if listener.isTarget(evt):
