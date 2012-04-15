@@ -1,0 +1,192 @@
+# Chinese translations for PACKAGE package.
+# Copyright (C) 2012 ORGANIZATION
+#  <lenin.lee@gmail.com>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2012-04-15 19:21+CST\n"
+"PO-Revision-Date: 2012-04-15 17:10+0800\n"
+"Last-Translator:  <lenin.lee@gmail.com>\n"
+"Language-Team: Chinese (simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+#: ultrablog/commands.py:128
+msgid "Invalid view !"
+msgstr "错误的视图！"
+
+#: ultrablog/commands.py:130
+msgid "File not exists !"
+msgstr "文件不存在！"
+
+#: ultrablog/commands.py:196
+msgid "Cannot find SQLAlchemy !"
+msgstr "SQLAlchemy未安装！"
+
+#: ultrablog/commands.py:198
+msgid "Cannot create database objects !"
+msgstr "无法创建数据库对象！"
+
+#: ultrablog/commands.py:199
+msgid "Settings of UltraBlog.vim is missing or invalid !"
+msgstr "UltraBlog.vim的配置信息不正确或丢失！"
+
+#: ultrablog/commands.py:200
+msgid "Cannot initiate API !"
+msgstr "无法初始化博客接口！"
+
+#: ultrablog/commands.py:201
+msgid "Cannot connect to database !"
+msgstr "无法连接数据库！"
+
+#: ultrablog/commands.py:208
+msgid "Unknow item type, available types are: post, page and tmpl !"
+msgstr "元素类型未知，合法类型有：post, page, tmpl！"
+
+#: ultrablog/commands.py:222
+msgid "Invalid scope !"
+msgstr "未知的作用域！"
+
+#: ultrablog/commands.py:230
+msgid "Unknown syntax, valid syntaxes are %s"
+msgstr "语法类型未知，合法类型有：%s"
+
+#: ultrablog/commands.py:239
+msgid "Invalid view, this command is only allowed in %s !"
+msgstr "错误的视图，此命令只在%s中可用！"
+
+#: ultrablog/commands.py:261
+msgid "Not implemented yet !"
+msgstr "尚未实现！"
+
+#: ultrablog/commands.py:292 ultrablog/commands.py:431
+msgid "Page NO. cannot be less than 1 !"
+msgstr "页码不能小于1！"
+
+#: ultrablog/commands.py:293 ultrablog/commands.py:432
+msgid "Illegal page size (%s) !"
+msgstr "非法的分页行数“%s”！"
+
+#: ultrablog/commands.py:330 ultrablog/commands.py:459
+msgid "No more posts found !"
+msgstr "找不到更多的文章！"
+
+#: ultrablog/commands.py:384
+msgid "No more pages found !"
+msgstr "找不到更多的页面！"
+
+#: ultrablog/commands.py:413
+msgid "No templates found !"
+msgstr "找不到更多的模板！"
+
+#: ultrablog/commands.py:490
+msgid "This buffer has not been modified !"
+msgstr "缓冲区未被修改！"
+
+#: ultrablog/commands.py:581
+msgid "%s sent as %s !"
+msgstr "%s已发布，状态：%s。"
+
+#: ultrablog/commands.py:656
+msgid "No post found !"
+msgstr "文章没找到！"
+
+#: ultrablog/commands.py:662
+msgid "No page found !"
+msgstr "页面没找到！"
+
+#: ultrablog/commands.py:711
+msgid "No template found !"
+msgstr "模板没找到！"
+
+#: ultrablog/commands.py:752
+msgid "Template \"%s\" exists !"
+msgstr "模板“%s”已存在！"
+
+#: ultrablog/commands.py:817
+msgid "Template '%s' is not found !"
+msgstr "模板“%s”没找到！"
+
+#: ultrablog/commands.py:854
+msgid "Cannot find %s by key value %s !"
+msgstr "无法找到%s（ID:%s）！"
+
+#: ultrablog/commands.py:858
+msgid "Are you sure to delete %s %s \"%s\" ?"
+msgstr "是否确认删除%s%s“%s”？"
+
+#: ultrablog/commands.py:860
+msgid "Deletion canceled !"
+msgstr "删除已取消！"
+
+#: ultrablog/commands.py:884
+msgid "%s %s \"%s\" was deleted !"
+msgstr "%s%s“%s”已删除。"
+
+#: ultrablog/commands.py:902 ultrablog/commands.py:927
+msgid "This is not an item !"
+msgstr "这不是一个合法的元素！"
+
+#: ultrablog/commands.py:998
+msgid "Cannot find key value of the current buffer !"
+msgstr "无法找到当前内容的键值！"
+
+#: ultrablog/util.py:40
+msgid "The buffer has been changed and cannot be cleared !"
+msgstr "内容已被修改，无法清空！"
+
+#: ultrablog/util.py:55
+msgid "Invalid status !"
+msgstr "非法的状态！"
+
+#: ultrablog/util.py:62
+msgid "'%s' is a reserved word !"
+msgstr "“%s”是一个保留字！"
+
+#: ultrablog/util.py:142
+msgid "template"
+msgstr "模板"
+
+#: ultrablog/util.py:144
+msgid "post"
+msgstr "文章"
+
+#: ultrablog/util.py:146
+msgid "page"
+msgstr "页面"
+
+#: ultrablog/util.py:153
+msgid "local"
+msgstr "本地"
+
+#: ultrablog/util.py:155
+msgid "remote"
+msgstr "远程"
+
+#: ultrablog/util.py:162
+msgid "publish"
+msgstr "公开"
+
+#: ultrablog/util.py:164
+msgid "draft"
+msgstr "草稿"
+
+#: ultrablog/util.py:166
+msgid "private"
+msgstr "私有"
+
+#: ultrablog/util.py:168
+msgid "pending"
+msgstr "审查"
+
+#: ultrablog/util.py:556
+msgid "Missing module: python-markdown or python-markdown2 !"
+msgstr "缺少模块：python-markdown或python-markdown2！"
+
+#: ultrablog/util.py:565
+msgid "Missing module: python-html2text !"
+msgstr "缺少模块：python-html2text！"

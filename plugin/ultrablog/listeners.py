@@ -25,7 +25,7 @@ class UBDebugListener(UBListener):
     
     @staticmethod
     def processEvent(evt):
-        print evt.srcObj
+        ub_echo(str(evt.srcObj))
 
 class UBTmplDelListener(UBListener):
     ''' Listener for templates deletion events
@@ -135,6 +135,31 @@ class UBPostSendListener(UBListener):
         for nr in ub_get_buffers(['remote_post_list','remote_page_list']):
             ub_set_view_outdated(nr)
 
+class UBViewEnterListener(UBListener):
+    ''' Listener for creating new views
+    1. Do mappings and setup buffer commands
+    '''
+    eventType = UBViewEnterEvent
+
+    @staticmethod
+    def processEvent(evt):
+        vim.command('mapclear <buffer>')
+        if evt.srcObj.endswith('_edit'):
+            vim.command("command! -buffer -nargs=0 UBSave exec('py ub_save_item()')")
+            vim.command("command! -buffer -nargs=? -complete=custom,StatusCmpl UBSend exec('py ub_send_item(<f-args>)')")
+            vim.command("command! -buffer -nargs=? -complete=custom,UBPreviewCmpl UBPreview exec('py ub_preview(<f-args>)')")
+            vim.command("command! -buffer -nargs=1 -complete=file UBUpload exec('py ub_upload_media(<f-args>)')")
+            vim.command("command! -buffer -nargs=* -complete=custom,SyntaxCmpl UBConv exec('py ub_convert(<f-args>)')")
+            vim.command("map <buffer> "+ub_get_option('ub_hotkey_save_current_item')+" :UBSave<cr>")
+            vim.command('setl wrap')
+        elif evt.srcObj.endswith('_list'):
+            vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_current_view')+" :py ub_open_item_under_cursor('cur')<cr>")
+            vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_splitted_view')+" :py ub_open_item_under_cursor('split')<cr>")
+            vim.command("map <buffer> "+ub_get_option('ub_hotkey_open_item_in_tabbed_view')+" :py ub_open_item_under_cursor('tab')<cr>")
+            vim.command("map <buffer> "+ub_get_option('ub_hotkey_delete_item')+" :py ub_del_item_under_cursor()<cr>")
+            vim.command('setl nowrap')
+        vim.command("command! -buffer -nargs=0 UBRefresh exec('py ub_refresh_current_view()')")
+
 UBEventQueue.registerListener(UBDebugListener)
 UBEventQueue.registerListener(UBTmplDelListener)
 UBEventQueue.registerListener(UBTmplSaveListener)
@@ -142,6 +167,7 @@ UBEventQueue.registerListener(UBLocalPostDelListener)
 UBEventQueue.registerListener(UBRemotePostDelListener)
 UBEventQueue.registerListener(UBPostSendListener)
 UBEventQueue.registerListener(UBPostSaveListener)
+UBEventQueue.registerListener(UBViewEnterListener)
 
 if __name__ == '__main__':
     pass

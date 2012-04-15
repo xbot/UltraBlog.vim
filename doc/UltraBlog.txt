@@ -6,7 +6,7 @@
 Author:      Lenin Lee   lenin.lee at gmail dot com       *UltraBlog_Author*
 URL:         http://0x3f.org/?p=1894                      *UltraBlog_URL*
 Description: Ultimate vim blogging plugin.                |UltraBlog_Motivation|
-Version:     3.2.0                                        |UltraBlog_History|
+Version:     3.3.0                                        |UltraBlog_History|
 License:     New BSD                                      |UltraBlog_License|
 Contribute:  Please report any bugs or suggestions        |UltraBlog_Bugs|
              to the address above.                        |UltraBlog_Future|
@@ -496,6 +496,25 @@ ub_hotkey_delete_item                                   *ub_hotkey_delete_item*
 
 ------------------------------------------------------------------------------
 
+ub_hotkey_save_current_item                       *ub_hotkey_save_current_item*
+
+    Set the hotkey to execute |:UBSave|.
+
+    This option has no default value.
+
+------------------------------------------------------------------------------
+
+ub_socket_timeout                                           *ub_socket_timeout*
+
+    The timeout period of xmlrpc operations. The value is a positive integer,
+    whose unit is second.
+
+    By default, the value is:
+
+    let ub_socket_timeout=10
+
+------------------------------------------------------------------------------
+
 ub_tmpl_img_url                                               *ub_tmpl_img_url*
 
     Set the link template for images uploaded by |:UBUpload|. This string 
@@ -549,9 +568,20 @@ Or submit issues with Github's issues tracker:
   History                                                   *UltraBlog_History*
 ==============================================================================
 
-3.x
+3.3.0
+    * Feature: Add i18n support !
+    * Feature: Add a new option |ub_hotkey_save_current_item|, users can
+               define their own hotkey for |:UBSave|.
+    * Feature: Add a new option |ub_socket_timeout|, users can customize the
+               timeout period in seconds, useful for slow networks.
     * Bugfix:  Exception raised when one event is processed by more than one
                event handlers.
+    * Change:  Echoing messages now uses the command :echoerr instead of
+               python's sys.stderr, because Vim crashes on this due to an
+               upgrade recently.
+    * Change:  Change commands |:UBSave|, |:UBSend|, |:UBUpload|, |:UBConv|,
+               |:UBPreview| to be available only in their effective views.
+    * Change:  Lists are set nowrapped.
 
 3.2.0
     * Change:  |:UBConv| now depends on the python-html2text module when

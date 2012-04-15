@@ -2,8 +2,7 @@
 " File:        UltraBlog.vim
 " Description: Ultimate vim blogging plugin that manages web logs
 " Author:      Lenin Lee <lenin.lee at gmail dot com>
-" Version:     3.2.0
-" Last Change: 2011-11-01
+" Version:     3.3.0
 " License:     The New BSD License
 "
 " ============================================================================
@@ -188,17 +187,11 @@ command! -nargs=* -complete=customlist,UBListCmpl UBList exec('py ub_list_items(
 command! -nargs=* -complete=customlist,UBNewCmpl UBNew exec('py ub_new_item(<f-args>)')
 command! -nargs=* -complete=customlist,UBOpenCmpl UBOpen exec('py ub_open_item_x(<f-args>)')
 command! -nargs=* -complete=customlist,UBDelCmpl UBDel exec('py ub_del_item(<f-args>)')
-command! -nargs=? -complete=custom,StatusCmpl UBSend exec('py ub_send_item(<f-args>)')
 command! -nargs=* -complete=customlist,UBThisCmpl UBThis exec('py ub_blog_this(<f-args>)')
-command! -nargs=? -complete=custom,UBPreviewCmpl UBPreview exec('py ub_preview(<f-args>)')
-command! -nargs=0 UBSave exec('py ub_save_item()')
-command! -nargs=1 -complete=file UBUpload exec('py ub_upload_media(<f-args>)')
-command! -nargs=* -complete=custom,SyntaxCmpl UBConv exec('py ub_convert(<f-args>)')
 command! -nargs=+ UBFind exec('py ub_find(1, <f-args>)')
-command! -nargs=0 UBRefresh exec('py ub_refresh_current_view()')
 
 " Auto-commands
-au BufEnter * py __ub_on_buffer_enter()
+autocmd! BufEnter * py __ub_on_buffer_enter()
 
 python <<EOF
 # -*- coding: utf-8 -*-
@@ -217,6 +210,4 @@ def __ub_on_buffer_enter():
         ub_refresh_current_view()
         ub_set_view_outdated('%', False)
 
-if __name__ == "__main__":
-    pass
 EOF

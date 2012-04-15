@@ -14,5 +14,7 @@ class UBRemotePostDelEvent(UBEvent): pass
 class UBPostSendEvent(UBEvent): pass
 class UBPostSaveEvent(UBEvent): pass
 
+class UBViewEnterEvent(UBEvent): pass
+
 if __name__ == '__main__':
     pass

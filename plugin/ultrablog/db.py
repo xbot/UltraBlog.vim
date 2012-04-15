@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os,xmlrpclib,sys
+import xmlrpclib,socket
 import util
 
 try:
@@ -191,11 +191,13 @@ cfg = None
 try:
     cfg = util.ub_get_blog_settings()
 except KeyError,e:
-    print >> sys.stdout,'Missing key %s in the settings list of UltraBlog.vim !' % str(e)
+    msg = 'Missing key %s in the settings list of UltraBlog.vim !' % str(e)
+    util.ub_echoerr(msg)
 except:
     pass
 
 try:
+    socket.setdefaulttimeout(util.ub_get_option('ub_socket_timeout'))
     api = xmlrpclib.ServerProxy(cfg.xmlrpc)
     db = sqlalchemy.create_engine("sqlite:///%s" % cfg.dbf)
 

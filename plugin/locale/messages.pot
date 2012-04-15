@@ -1,0 +1,197 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2012-04-15 19:21+CST\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ultrablog/commands.py:128
+msgid "Invalid view !"
+msgstr ""
+
+#: ultrablog/commands.py:130
+msgid "File not exists !"
+msgstr ""
+
+#: ultrablog/commands.py:196
+msgid "Cannot find SQLAlchemy !"
+msgstr ""
+
+#: ultrablog/commands.py:198
+msgid "Cannot create database objects !"
+msgstr ""
+
+#: ultrablog/commands.py:199
+msgid "Settings of UltraBlog.vim is missing or invalid !"
+msgstr ""
+
+#: ultrablog/commands.py:200
+msgid "Cannot initiate API !"
+msgstr ""
+
+#: ultrablog/commands.py:201
+msgid "Cannot connect to database !"
+msgstr ""
+
+#: ultrablog/commands.py:208
+msgid "Unknow item type, available types are: post, page and tmpl !"
+msgstr ""
+
+#: ultrablog/commands.py:222
+msgid "Invalid scope !"
+msgstr ""
+
+#: ultrablog/commands.py:230
+msgid "Unknown syntax, valid syntaxes are %s"
+msgstr ""
+
+#: ultrablog/commands.py:239
+msgid "Invalid view, this command is only allowed in %s !"
+msgstr ""
+
+#: ultrablog/commands.py:261
+msgid "Not implemented yet !"
+msgstr ""
+
+#: ultrablog/commands.py:292 ultrablog/commands.py:431
+msgid "Page NO. cannot be less than 1 !"
+msgstr ""
+
+#: ultrablog/commands.py:293 ultrablog/commands.py:432
+msgid "Illegal page size (%s) !"
+msgstr ""
+
+#: ultrablog/commands.py:330 ultrablog/commands.py:459
+msgid "No more posts found !"
+msgstr ""
+
+#: ultrablog/commands.py:384
+msgid "No more pages found !"
+msgstr ""
+
+#: ultrablog/commands.py:413
+msgid "No templates found !"
+msgstr ""
+
+#: ultrablog/commands.py:490
+msgid "This buffer has not been modified !"
+msgstr ""
+
+#: ultrablog/commands.py:581
+msgid "%s sent as %s !"
+msgstr ""
+
+#: ultrablog/commands.py:656
+msgid "No post found !"
+msgstr ""
+
+#: ultrablog/commands.py:662
+msgid "No page found !"
+msgstr ""
+
+#: ultrablog/commands.py:711
+msgid "No template found !"
+msgstr ""
+
+#: ultrablog/commands.py:752
+msgid "Template \"%s\" exists !"
+msgstr ""
+
+#: ultrablog/commands.py:817
+msgid "Template '%s' is not found !"
+msgstr ""
+
+#: ultrablog/commands.py:854
+msgid "Cannot find %s by key value %s !"
+msgstr ""
+
+#: ultrablog/commands.py:858
+msgid "Are you sure to delete %s %s \"%s\" ?"
+msgstr ""
+
+#: ultrablog/commands.py:860
+msgid "Deletion canceled !"
+msgstr ""
+
+#: ultrablog/commands.py:884
+msgid "%s %s \"%s\" was deleted !"
+msgstr ""
+
+#: ultrablog/commands.py:902 ultrablog/commands.py:927
+msgid "This is not an item !"
+msgstr ""
+
+#: ultrablog/commands.py:998
+msgid "Cannot find key value of the current buffer !"
+msgstr ""
+
+#: ultrablog/util.py:40
+msgid "The buffer has been changed and cannot be cleared !"
+msgstr ""
+
+#: ultrablog/util.py:55
+msgid "Invalid status !"
+msgstr ""
+
+#: ultrablog/util.py:62
+msgid "'%s' is a reserved word !"
+msgstr ""
+
+#: ultrablog/util.py:142
+msgid "template"
+msgstr ""
+
+#: ultrablog/util.py:144
+msgid "post"
+msgstr ""
+
+#: ultrablog/util.py:146
+msgid "page"
+msgstr ""
+
+#: ultrablog/util.py:153
+msgid "local"
+msgstr ""
+
+#: ultrablog/util.py:155
+msgid "remote"
+msgstr ""
+
+#: ultrablog/util.py:162
+msgid "publish"
+msgstr ""
+
+#: ultrablog/util.py:164
+msgid "draft"
+msgstr ""
+
+#: ultrablog/util.py:166
+msgid "private"
+msgstr ""
+
+#: ultrablog/util.py:168
+msgid "pending"
+msgstr ""
+
+#: ultrablog/util.py:386
+msgid "Unknown view !"
+msgstr ""
+
+#: ultrablog/util.py:556
+msgid "Missing module: python-markdown or python-markdown2 !"
+msgstr ""
+
+#: ultrablog/util.py:565
+msgid "Missing module: python-html2text !"
+msgstr ""
+

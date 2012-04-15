@@ -1,0 +1,72 @@
+# Chinese translations for PACKAGE package.
+# Copyright (C) 2012 ORGANIZATION
+#  <lenin.lee@gmail.com>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2012-04-15 19:07+CST\n"
+"PO-Revision-Date: 2012-04-15 17:10+0800\n"
+"Last-Translator:  <lenin.lee@gmail.com>\n"
+"Language-Team: Chinese (simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+#: ultrablog/commands.py:581
+msgid "%s sent as %s !"
+msgstr "%s已发布，状态：%s。"
+
+#: ultrablog/commands.py:854
+msgid "Cannot find %s by key value %s !"
+msgstr "无法找到%s（ID:%s）！"
+
+#: ultrablog/commands.py:858
+msgid "Are you sure to delete %s %s \"%s\" ?"
+msgstr "是否确认删除%s%s“%s”？"
+
+#: ultrablog/commands.py:860
+msgid "Deletion canceled !"
+msgstr "删除已取消！"
+
+#: ultrablog/commands.py:884
+msgid "%s %s \"%s\" was deleted !"
+msgstr "%s%s“%s”已删除。"
+
+#: ultrablog/util.py:142
+msgid "template"
+msgstr "模板"
+
+#: ultrablog/util.py:144
+msgid "post"
+msgstr "文章"
+
+#: ultrablog/util.py:146
+msgid "page"
+msgstr "页面"
+
+#: ultrablog/util.py:153
+msgid "local"
+msgstr "本地"
+
+#: ultrablog/util.py:155
+msgid "remote"
+msgstr "远程"
+
+#: ultrablog/util.py:162
+msgid "publish"
+msgstr "公开"
+
+#: ultrablog/util.py:164
+msgid "draft"
+msgstr "草稿"
+
+#: ultrablog/util.py:166
+msgid "private"
+msgstr "私有"
+
+#: ultrablog/util.py:168
+msgid "pending"
+msgstr "审查"

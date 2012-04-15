@@ -2,6 +2,8 @@
 
 import vim,re,types,os
 from exceptions import *
+from events import UBViewEnterEvent
+from eventqueue import UBEventQueue
 
 def ub_wise_open_view(view_name=None, view_type=None):
     '''Wisely decide whether to wipe out the content of current buffer 
@@ -22,7 +24,8 @@ def ub_wise_open_view(view_name=None, view_type=None):
     if view_name is not None:
         vim.command("let b:ub_view_name = '%s'" % view_name)
 
-    vim.command('mapclear <buffer>')
+    UBEventQueue.fireEvent(UBViewEnterEvent(view_name))
+    UBEventQueue.processEvents()
 
 def ub_clear_buffer(expr, force=False):
     ''' Clear the specified buffer and reset related statuses
@@ -34,7 +37,7 @@ def ub_clear_buffer(expr, force=False):
         if force is True:
             vim.command('setl nomodified')
         else:
-            raise UBException('The buffer has been changed and cannot be cleared !')
+            raise UBException(_('The buffer has been changed and cannot be cleared !'))
 
     vim.command('setl modifiable')
     del vim.buffers[nr-1][:]
@@ -49,14 +52,14 @@ def ub_check_status(status):
     elif status in ['private', 'pending', 'draft']:
         return False
     else:
-        raise UBException('Invalid status !')
+        raise UBException(_('Invalid status !'))
 
 def ub_check_reserved_word(rw):
     ''' Check if the given parameter is a reserved word
     '''
     try: ub_check_status(rw)
     except UBException: pass
-    else: raise UBException("'%s' is a reserved word !" % rw)
+    else: raise UBException(_("'%s' is a reserved word !") % rw)
 
 def ub_is_valid_syntax(syntax):
     '''Check if the given parameter is one of the supported syntaxes
@@ -136,10 +139,34 @@ def ub_get_item_type_name(type):
     ''' Get item type name by type
     '''
     if type == 'tmpl':
-        return 'template'
-    elif type == 'result':
-        return 'post'
+        return _('template')
+    elif type in ['result','post']:
+        return _('post')
+    elif type == 'page':
+        return _('page')
     return type
+
+def ub_get_scope_name(scope):
+    ''' Get scope name
+    '''
+    if scope == 'local':
+        return _('local')
+    elif scope == 'remote':
+        return _('remote')
+    return scope
+
+def ub_get_status_label(status):
+    ''' Get status label
+    '''
+    if status == 'publish':
+        return _('publish')
+    elif status == 'draft':
+        return _('draft')
+    elif status == 'private':
+        return _('private')
+    elif status == 'pending':
+        return _('pending')
+    return status
 
 def ub_get_list_template():
     '''Return a template string for post or page list
@@ -168,40 +195,50 @@ def ub_get_list_template():
 def ub_get_option(opt, deal=False):
     '''Get the value of an UltraBlog option
     '''
+    def __get_positive(val, default):
+        if (type(val) is types.IntType and val>0) \
+                or (type(val) is types.StringType and val.isdigit() and int(val)>0):
+            val = int(val)
+        else:
+            val = default
+        return val
+
+    val = None
     if vim.eval('exists("%s")' % opt) == '1':
         val = vim.eval(opt)
-    elif opt == 'ub_converter_command':
-        val = 'pandoc'
+
+    if opt == 'ub_converter_command':
+        val = val is None and 'pandoc' or val
     elif opt == 'ub_converter_option_from':
-        val = '--from=%s'
+        val = val is None and '--from=%s' or val
     elif opt == 'ub_converter_option_to':
-        val = '--to=%s'
+        val = val is None and '--to=%s' or val
     elif opt == 'ub_converter_options':
-        val = ['--reference-links']
+        val = val is None and ['--reference-links'] or val
     elif opt == 'ub_hotkey_open_item_in_current_view':
-        val = '<enter>'
+        val = val is None and '<enter>' or val
     elif opt == 'ub_hotkey_open_item_in_splitted_view':
-        val = '<s-enter>'
+        val = val is None and '<s-enter>' or val
     elif opt == 'ub_hotkey_open_item_in_tabbed_view':
-        val = '<c-enter>'
+        val = val is None and '<c-enter>' or val
     elif opt == 'ub_hotkey_delete_item':
-        val = '<del>'
+        val = val is None and '<del>' or val
     elif opt == 'ub_hotkey_pagedown':
-        val = '<c-pagedown>'
+        val = val is None and '<c-pagedown>' or val
     elif opt == 'ub_hotkey_pageup':
-        val = '<c-pageup>'
+        val = val is None and '<c-pageup>' or val
     elif opt == 'ub_tmpl_img_url':
-        val = "markdown###![%(file)s][]\n[%(file)s]:%(url)s"
-    elif opt == 'ub_local_pagesize':
-        val = 30
-    elif opt == 'ub_remote_pagesize':
-        val = 10
-    elif opt == 'ub_search_pagesize':
-        val = 30
+        val = val is None and "markdown###![%(file)s][]\n[%(file)s]:%(url)s" or val
     elif opt == 'ub_default_template':
-        val = 'default'
-    else:
-        val = None
+        val = val is None and 'default' or val
+    elif opt == 'ub_local_pagesize':
+        val = __get_positive(val, 30)
+    elif opt == 'ub_remote_pagesize':
+        val = __get_positive(val, 10)
+    elif opt == 'ub_search_pagesize':
+        val = __get_positive(val, 30)
+    elif opt == 'ub_socket_timeout':
+        val = __get_positive(val, 10)
 
     if deal:
         if opt == 'ub_tmpl_img_url':
@@ -346,7 +383,7 @@ def ub_fill_meta_data(meta_data):
     elif ub_is_view('tmpl_edit'):
         __ub_fill_tmpl_meta_data(meta_data)
     else:
-        raise UBException('Unknown view !')
+        raise UBException(_('Invalid view !'))
 
 def __ub_fill_post_meta_data(meta_dict):
     '''Fill the current buffer with some lines of meta data for a post
@@ -516,7 +553,7 @@ def ub_convert_str(content, from_syntax, to_syntax, encoding=None):
             try:
                 import markdown2 as markdown
             except ImportError:
-                raise UBException('Missing module: python-markdown or python-markdown2 !')
+                raise UBException(_('Missing module: python-markdown or python-markdown2 !'))
         if encoding is not None:
             new_content = markdown.markdown(content.decode(encoding)).encode(encoding)
         else:
@@ -525,7 +562,7 @@ def ub_convert_str(content, from_syntax, to_syntax, encoding=None):
         try:
             import html2text
         except ImportError:
-            raise UBException('Missing module: python-html2text !')
+            raise UBException(_('Missing module: python-html2text !'))
         if encoding is not None:
             new_content = html2text.html2text(content.decode(encoding)).encode(encoding)
         else:
@@ -559,6 +596,14 @@ def ub_get_templates(name_only=False):
         pass
 
     return tmpls
+
+def ub_echoerr(msg):
+    cmd = '''echoerr "%s"''' % msg.replace('"', "'")
+    vim.command(cmd)
+
+def ub_echo(msg):
+    cmd = '''echo "%s"''' % msg.replace('"', "'")
+    vim.command(cmd)
 
 if __name__ == '__main__':
     pass
