@@ -14,12 +14,13 @@ Enjoy Vim blogging !
 Features
 --------
 
-* Event-driven system.
 * Multiple syntax support: Markdown, HTML, reStructuredText, LaTeX, Textile.
 * Editor mode and client mode.
 * Data is stored in a local SQLite database in client mode.
 * Context search with keywords highlighting.
 * Templates for previewing posts.
+* Event-driven system.
+* I18N.
 
 Tips
 --------
