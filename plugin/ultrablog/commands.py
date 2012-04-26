@@ -53,10 +53,10 @@ def ub_list_items(item_type='post', scope='local', page_size=None, page_no=None)
     cmd.execute()
 
 @__ub_exception_handler
-def ub_find(page_no, *keywords):
+def ub_search(is_regexp, page_no, *keywords):
     ''' List posts/pages which match the keywords given
     '''
-    cmd = UBCmdFind(page_no, *keywords)
+    cmd = UBCmdSearch(is_regexp, page_no, *keywords)
     cmd.execute()
 
 @__ub_exception_handler
@@ -301,6 +301,7 @@ class UBCmdList(UBCommand):
         vim.command('call UBClearUndo()')
         vim.command('setl nomodified')
         vim.command("setl nomodifiable")
+        vim.command("setl nohls")
         vim.current.window.cursor = (2, 0)
 
     def _listLocalPosts(self):
@@ -417,17 +418,18 @@ class UBCmdList(UBCommand):
         line = "%-24s%s"
         vim.current.buffer.append([(line % (tmpl.name,tmpl.description)).encode(self.enc) for tmpl in tmpls])
 
-class UBCmdFind(UBCommand):
+class UBCmdSearch(UBCommand):
     ''' Context search
     '''
-    def __init__(self, pageNo, *keywords):
+    def __init__(self, isRegexp, pageNo, *keywords):
         UBCommand.__init__(self)
         self.pageSize = int(ub_get_option("ub_%s_pagesize" % self.scope))
         self.pageNo = int(pageNo is not None and pageNo or 1)
         self.keywords = keywords
+        self.isRegexp = isRegexp
 
     def _preExec(self):
-        UBCmdFind.doDefault()
+        UBCmdSearch.doDefault()
         if self.pageNo<1: raise UBException(_('Page NO. cannot be less than 1 !'))
         if self.pageSize<1: raise UBException(_('Illegal page size (%s) !') % self.pageSize)
 
@@ -438,8 +440,12 @@ class UBCmdFind(UBCommand):
         conds = []
         for keyword in self.keywords:
             kwcond = []
-            kwcond.append(tbl.c.title.like('%%%s%%' % keyword.decode(self.enc)))
-            kwcond.append(tbl.c.content.like('%%%s%%' % keyword.decode(self.enc)))
+            if self.isRegexp:
+                kwcond.append(tbl.c.title.op('regexp')(keyword.decode(self.enc)))
+                kwcond.append(tbl.c.content.op('regexp')(keyword.decode(self.enc)))
+            else:
+                kwcond.append(tbl.c.title.like('%%%s%%' % keyword.decode(self.enc)))
+                kwcond.append(tbl.c.content.like('%%%s%%' % keyword.decode(self.enc)))
             conds.append(or_(*kwcond))
 
         stmt = select([tbl.c.id,case([(tbl.c.post_id>0, tbl.c.post_id)], else_=0).label('post_id'),tbl.c.status,tbl.c.title],
@@ -447,6 +453,12 @@ class UBCmdFind(UBCommand):
         ).limit(self.pageSize).offset(self.pageSize*(self.pageNo-1)).order_by(tbl.c.status.asc(),tbl.c.post_id.desc())
 
         conn = db.connect()
+        # Hook regexp function to sqlite3 if the current mode is regexp
+        if self.isRegexp:
+            def regexp(expr, item):
+                reg = re.compile(expr)
+                return reg.search(item) is not None
+            conn.connection.create_function('REGEXP', 2, regexp)
         rslt = conn.execute(stmt)
         while True:
             row = rslt.fetchone()
@@ -465,9 +477,10 @@ class UBCmdFind(UBCommand):
 
         vim.command("let b:page_no=%s" % self.pageNo)
         vim.command("let b:page_size=%s" % self.pageSize)
+        vim.command("let b:is_regexp=%s" % self.isRegexp)
         vim.command("let b:ub_keywords=[%s]" % ','.join(["'%s'" % kw for kw in self.keywords]))
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_pagedown')+" :py ub_find(%d,%s)<cr>" % (self.pageNo+1, ','.join(["'%s'" % kw for kw in self.keywords])))
-        vim.command("map <buffer> "+ub_get_option('ub_hotkey_pageup')+" :py ub_find(%d,%s)<cr>" % (self.pageNo-1, ','.join(["'%s'" % kw for kw in self.keywords])))
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_pagedown')+" :py ub_search(%d,%d,%s)<cr>" % (self.isRegexp, self.pageNo+1, ','.join(["'%s'" % kw for kw in self.keywords])))
+        vim.command("map <buffer> "+ub_get_option('ub_hotkey_pageup')+" :py ub_search(%d,%d,%s)<cr>" % (self.isRegexp, self.pageNo-1, ','.join(["'%s'" % kw for kw in self.keywords])))
         vim.command('call UBClearUndo()')
         vim.command('setl nomodified')
         vim.command("setl nomodifiable")
@@ -978,7 +991,8 @@ class UBCmdRefresh(UBCommand):
         if self.viewName == 'search_result_list':
             kws = ub_get_bufvar('ub_keywords')
             pno = ub_get_bufvar('page_no')
-            ub_find(pno, *kws)
+            isregexp = ub_get_bufvar('is_regexp')
+            ub_search(isregexp, pno, *kws)
         elif ub_is_view_of_type('list'):
             psize = ub_get_bufvar('page_size')
             pno = ub_get_bufvar('page_no')

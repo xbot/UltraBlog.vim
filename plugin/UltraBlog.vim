@@ -2,7 +2,7 @@
 " File:        UltraBlog.vim
 " Description: Ultimate vim blogging plugin that manages web logs
 " Author:      Lenin Lee <lenin.lee at gmail dot com>
-" Version:     3.3.0
+" Version:     3.4.0
 " License:     The New BSD License
 "
 " ============================================================================
@@ -188,7 +188,8 @@ command! -nargs=* -complete=customlist,UBNewCmpl UBNew exec('py ub_new_item(<f-a
 command! -nargs=* -complete=customlist,UBOpenCmpl UBOpen exec('py ub_open_item_x(<f-args>)')
 command! -nargs=* -complete=customlist,UBDelCmpl UBDel exec('py ub_del_item(<f-args>)')
 command! -nargs=* -complete=customlist,UBThisCmpl UBThis exec('py ub_blog_this(<f-args>)')
-command! -nargs=+ UBFind exec('py ub_find(1, <f-args>)')
+command! -nargs=+ UBFind exec('py ub_search(0, 1, <f-args>)')
+command! -nargs=+ UBRegexSearch exec('py ub_search(1, 1, <f-args>)')
 
 " Auto-commands
 autocmd! BufEnter * py __ub_on_buffer_enter()

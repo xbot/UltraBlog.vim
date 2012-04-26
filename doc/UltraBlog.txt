@@ -6,7 +6,7 @@
 Author:      Lenin Lee   lenin.lee at gmail dot com       *UltraBlog_Author*
 URL:         http://0x3f.org/?p=1894                      *UltraBlog_URL*
 Description: Ultimate vim blogging plugin.                |UltraBlog_Motivation|
-Version:     3.3.0                                        |UltraBlog_History|
+Version:     3.4.0                                        |UltraBlog_History|
 License:     New BSD                                      |UltraBlog_License|
 Contribute:  Please report any bugs or suggestions        |UltraBlog_Bugs|
              to the address above.                        |UltraBlog_Future|
@@ -65,7 +65,8 @@ Enjoy Vim blogging !
       Textile.
     * Editor mode and client mode.
     * Data is stored in a local SQLite database in client mode.
-    * Context search with keywords highlighting.
+    * Context search with keywords highlighted.
+    * Context search by using regular expressions.
     * Templates for previewing posts.
 
 ==============================================================================
@@ -325,8 +326,14 @@ All keymappings can be customized by setting some options, refer to
     Refresh the current buffer.
 
 :UBFind keyword1 [keyword2 ...]                                       *:UBFind*
-    Context search for both posts and pages, all keywords will be highlighted.
-    Page size of the search result list is controlled by |ub_search_pagesize|.
+    Doing context searches for both posts and pages by keywords, all keywords 
+    will be highlighted. Page size of the search result list is controlled by 
+    |ub_search_pagesize|.
+
+:UBRegexSearch regexp1 [regexp2 ...]                           *:UBRegexSearch*
+    Doing context searches for both posts and pages by regular expressions, 
+    all strings that match the regular expressions will be highlighted. Page 
+    size of the search result list is controlled by |ub_search_pagesize|.
 
 ==============================================================================
   Options                                                   *UltraBlog_Options*
@@ -567,6 +574,11 @@ Or submit issues with Github's issues tracker:
 ==============================================================================
   History                                                   *UltraBlog_History*
 ==============================================================================
+
+3.4.0
+    * Feature: Add the command |:UBRegexSearch|, doing context searches with
+               regular expressions !
+    * Change:  Undo keywords highlighting after executing |:UBList|.
 
 3.3.0
     * Feature: Add i18n support !
