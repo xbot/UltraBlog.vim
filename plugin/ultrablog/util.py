@@ -227,6 +227,8 @@ def ub_get_option(opt, deal=False):
         val = val is None and '<c-pagedown>' or val
     elif opt == 'ub_hotkey_pageup':
         val = val is None and '<c-pageup>' or val
+    elif opt == 'ub_hotkey_save_current_item':
+        val = val is None and '<c-s>' or val
     elif opt == 'ub_tmpl_img_url':
         val = val is None and "markdown###![%(file)s][]\n[%(file)s]:%(url)s" or val
     elif opt == 'ub_default_template':
