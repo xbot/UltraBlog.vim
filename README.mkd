@@ -17,8 +17,10 @@ Features
 * Multiple syntax support: Markdown, HTML, reStructuredText, LaTeX, Textile.
 * Editor mode and client mode.
 * Data is stored in a local SQLite database in client mode.
-* Context search with keywords highlighted.
-* Context search by using regular expressions.
+* Full-text search with keywords highlighted.
+* Full-text search by using regular expressions.
+* Full-text substitutions.
+* Full-text substitutions using regular expressions.
 * Templates for previewing posts.
 * Event-driven system.
 * I18N.

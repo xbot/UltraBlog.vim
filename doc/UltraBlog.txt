@@ -326,14 +326,20 @@ All keymappings can be customized by setting some options, refer to
     Refresh the current buffer.
 
 :UBFind keyword1 [keyword2 ...]                                       *:UBFind*
-    Doing context searches for both posts and pages by keywords, all keywords 
-    will be highlighted. Page size of the search result list is controlled by 
-    |ub_search_pagesize|.
+    Doing full-text searches for both posts and pages by keywords, all 
+    keywords will be highlighted. Page size of the search result list is 
+    controlled by |ub_search_pagesize|.
 
 :UBRegexSearch regexp1 [regexp2 ...]                           *:UBRegexSearch*
-    Doing context searches for both posts and pages by regular expressions, 
+    Doing full-text searches for both posts and pages by regular expressions, 
     all strings that match the regular expressions will be highlighted. Page 
     size of the search result list is controlled by |ub_search_pagesize|.
+
+:UBReplace needle replacement                                      *:UBReplace*
+    Doing full-text substitutions.
+
+:UBRegexReplace regexp replacement                            *:UBRegexReplace*
+    Doing full-text substitutions using regular expressions.
 
 ==============================================================================
   Options                                                   *UltraBlog_Options*
@@ -507,7 +513,9 @@ ub_hotkey_save_current_item                       *ub_hotkey_save_current_item*
 
     Set the hotkey to execute |:UBSave|.
 
-    This option has no default value.
+    By default, the value is:
+
+    let ub_hotkey_save_current_item='<c-s>'
 
 ------------------------------------------------------------------------------
 
@@ -576,9 +584,15 @@ Or submit issues with Github's issues tracker:
 ==============================================================================
 
 3.4.0
-    * Feature: Add the command |:UBRegexSearch|, doing context searches with
+    * Feature: Add the command |:UBRegexSearch|, doing full-text searches with
                regular expressions !
+    * Feature: Add the command |:UBReplace|, doing full-text substitutions.
+    * Feature: Add the command |:UBRegexReplace|, doing full-text substitutions
+               with regular expressions.
     * Change:  Undo keywords highlighting after executing |:UBList|.
+    * Bugfix:  Exceptions raised when opening the current item under cursor
+               in item lists if the option |ub_hotkey_save_current_item| has
+               not been set. Now this options comes with a default value.
 
 3.3.0
     * Feature: Add i18n support !
