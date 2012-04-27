@@ -89,14 +89,14 @@ def ub_upgrade():
         conn = db.connect()
         stmt = select([Post.type]).limit(1)
         try:
-            result = conn.execute(stmt)
+            conn.execute(stmt)
         except OperationalError:
             sql = "alter table post add type varchar(32) not null default 'post'"
             conn.execute(sql)
 
         stmt = select([Post.status]).limit(1)
         try:
-            result = conn.execute(stmt)
+            conn.execute(stmt)
         except OperationalError:
             sql = "alter table post add status varchar(32) not null default 'draft'"
             conn.execute(sql)

@@ -15,6 +15,7 @@ class UBPostSendEvent(UBEvent): pass
 class UBPostSaveEvent(UBEvent): pass
 
 class UBViewEnterEvent(UBEvent): pass
+class UBReplaceCompleteEvent(UBEvent): pass
 
 if __name__ == '__main__':
     pass

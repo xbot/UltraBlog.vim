@@ -190,6 +190,8 @@ command! -nargs=* -complete=customlist,UBDelCmpl UBDel exec('py ub_del_item(<f-a
 command! -nargs=* -complete=customlist,UBThisCmpl UBThis exec('py ub_blog_this(<f-args>)')
 command! -nargs=+ UBFind exec('py ub_search(0, 1, <f-args>)')
 command! -nargs=+ UBRegexSearch exec('py ub_search(1, 1, <f-args>)')
+command! -nargs=+ UBReplace exec('py ub_replace(0, <f-args>)')
+command! -nargs=+ UBRegexReplace exec('py ub_replace(1, <f-args>)')
 
 " Auto-commands
 autocmd! BufEnter * py __ub_on_buffer_enter()

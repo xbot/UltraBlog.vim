@@ -60,6 +60,13 @@ def ub_search(is_regexp, page_no, *keywords):
     cmd.execute()
 
 @__ub_exception_handler
+def ub_replace(is_regexp, needle, replacement):
+    ''' List posts/pages which match the keywords given
+    '''
+    cmd = UBCmdReplace(is_regexp, needle, replacement)
+    cmd.execute()
+
+@__ub_exception_handler
 def ub_refresh_current_view():
     ''' Refresh current view
     '''
@@ -487,6 +494,46 @@ class UBCmdSearch(UBCommand):
         vim.current.window.cursor = (2, 0)
         vim.command("let @/='\\(%s\\)'" % '\\|'.join(self.keywords))
         vim.command('setl hls')
+
+class UBCmdReplace(UBCommand):
+    ''' Context replace
+    '''
+    def __init__(self, isRegexp, needle, replacement):
+        UBCommand.__init__(self)
+        self.isRegexp = isRegexp
+        self.needle = needle
+        self.replacement = replacement
+        self.count = 0
+
+    def _preExec(self):
+        UBCmdReplace.doDefault()
+
+    def _exec(self):
+        conn = db.connect()
+        # Hook regexp function to sqlite3 if the current mode is regexp
+        if self.isRegexp:
+            def regexp(expr, item):
+                reg = re.compile(expr)
+                return reg.search(item) is not None
+            conn.connection.create_function('REGEXP', 2, regexp)
+            conn.connection.create_function('regex_replace', 3, regex_replace)
+            sql_replace = "update post set title=regex_replace(title,:needle,:replacement),content=regex_replace(content,:needle,:replacement)"
+            sql_count = "select count(*) from post where title regexp :needle or content regexp :needle"
+            rslt = conn.execute(sql_count, {'needle':self.needle.decode(self.enc)})
+            self.count = rslt.fetchone()[0]
+        else:
+            sql_replace = "update post set title=replace(title,:needle,:replacement),content=replace(content,:needle,:replacement)"
+            needle = '%%%s%%' % self.needle.decode(self.enc)
+            self.count = self.sess.query(Post).filter(or_(Post.title.like(needle),Post.content.like(needle))).count()
+        conn.execute(sql_replace, {'needle':self.needle.decode(self.enc), 'replacement':self.replacement.decode(self.enc)})
+        conn.close()
+
+    def _postExec(self):
+        UBCmdReplace.doDefault()
+        evt = UBReplaceCompleteEvent(self.count)
+        UBEventQueue.fireEvent(evt)
+        UBEventQueue.processEvents()
+        ub_echo(_('%d items substituted !') % self.count)
 
 class UBCmdSave(UBCommand):
     ''' Save items

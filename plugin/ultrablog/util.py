@@ -227,6 +227,8 @@ def ub_get_option(opt, deal=False):
         val = val is None and '<c-pagedown>' or val
     elif opt == 'ub_hotkey_pageup':
         val = val is None and '<c-pageup>' or val
+    elif opt == 'ub_hotkey_save_current_item':
+        val = val is None and '<c-s>' or val
     elif opt == 'ub_tmpl_img_url':
         val = val is None and "markdown###![%(file)s][]\n[%(file)s]:%(url)s" or val
     elif opt == 'ub_default_template':
@@ -605,5 +607,19 @@ def ub_echo(msg):
     cmd = '''echo "%s"''' % msg.replace('"', "'")
     vim.command(cmd)
 
+def raw(text):
+    """Returns a raw string representation of text"""
+    escape_dict={'\a':r'\a', '\b':r'\b', '\c':r'\c', '\f':r'\f', '\n':r'\n',
+               '\r':r'\r', '\t':r'\t', '\v':r'\v', '\'':r'\'', '\"':r'\"',
+               '\0':r'\0', '\1':r'\1', '\2':r'\2', '\3':r'\3', '\4':r'\4',
+               '\5':r'\5', '\6':r'\6', '\7':r'\7', '\8':r'\8', '\9':r'\9'}
+    return "".join([escape_dict.get(char,char) for char in text])
+
+def regex_replace(string, expr, repl):
+    r = re.compile(raw(expr))
+    return r.sub(repl, string)
+
 if __name__ == '__main__':
     pass
+    conn.connection.create_function('regex_replace', 3, regex_replace)
+    stmt = "update post set content=regex_replace(content,'abc', 'lenin')"

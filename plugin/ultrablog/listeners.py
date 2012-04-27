@@ -160,6 +160,22 @@ class UBViewEnterListener(UBListener):
             vim.command('setl nowrap')
         vim.command("command! -buffer -nargs=0 UBRefresh exec('py ub_refresh_current_view()')")
 
+class UBReplaceCompleteListener(UBListener):
+    ''' Listener for context replacement event
+    1. Refresh the current view if it is an list view of this post
+    2. Mark all list views of posts/pages outdated
+    '''
+    eventType = UBReplaceCompleteEvent
+
+    @staticmethod
+    def processEvent(evt):
+        if evt.srcObj <= 0: return
+        for nr in ub_get_buffers(['post_edit','page_edit','post_list','page_list','search_result_list']):
+            if nr == ub_get_bufnr('%'):
+                ub_refresh_current_view()
+            else:
+                ub_set_view_outdated(nr)
+
 UBEventQueue.registerListener(UBDebugListener)
 UBEventQueue.registerListener(UBTmplDelListener)
 UBEventQueue.registerListener(UBTmplSaveListener)
@@ -168,6 +184,7 @@ UBEventQueue.registerListener(UBRemotePostDelListener)
 UBEventQueue.registerListener(UBPostSendListener)
 UBEventQueue.registerListener(UBPostSaveListener)
 UBEventQueue.registerListener(UBViewEnterListener)
+UBEventQueue.registerListener(UBReplaceCompleteListener)
 
 if __name__ == '__main__':
     pass
