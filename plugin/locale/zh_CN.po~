@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-04-28 10:23+CST\n"
+"POT-Creation-Date: 2012-04-30 01:24+CST\n"
 "PO-Revision-Date: 2012-04-15 17:10+0800\n"
 "Last-Translator:  <lenin.lee@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -15,129 +15,139 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: ultrablog/commands.py:135 ultrablog/util.py:388
+#: ultrablog/commands.py:155 ultrablog/util.py:392
 msgid "Invalid view !"
 msgstr "错误的视图！"
 
-#: ultrablog/commands.py:137
+#: ultrablog/commands.py:157
 msgid "File not exists !"
 msgstr "文件不存在！"
 
-#: ultrablog/commands.py:203
+#: ultrablog/commands.py:223
 msgid "Cannot find SQLAlchemy !"
 msgstr "SQLAlchemy未安装！"
 
-#: ultrablog/commands.py:205
+#: ultrablog/commands.py:225
 msgid "Cannot create database objects !"
 msgstr "无法创建数据库对象！"
 
-#: ultrablog/commands.py:206
+#: ultrablog/commands.py:226
 msgid "Settings of UltraBlog.vim is missing or invalid !"
 msgstr "UltraBlog.vim的配置信息不正确或丢失！"
 
-#: ultrablog/commands.py:207
+#: ultrablog/commands.py:227
 msgid "Cannot initiate API !"
 msgstr "无法初始化博客接口！"
 
-#: ultrablog/commands.py:208
+#: ultrablog/commands.py:228
 msgid "Cannot connect to database !"
 msgstr "无法连接数据库！"
 
-#: ultrablog/commands.py:215
+#: ultrablog/commands.py:235
 msgid "Unknow item type, available types are: post, page and tmpl !"
 msgstr "元素类型未知，合法类型有：post, page, tmpl！"
 
-#: ultrablog/commands.py:229
+#: ultrablog/commands.py:249
 msgid "Invalid scope !"
 msgstr "未知的作用域！"
 
-#: ultrablog/commands.py:237
+#: ultrablog/commands.py:257
 msgid "Unknown syntax, valid syntaxes are %s"
 msgstr "语法类型未知，合法类型有：%s"
 
-#: ultrablog/commands.py:246
+#: ultrablog/commands.py:266
 msgid "Invalid view, this command is only allowed in %s !"
 msgstr "错误的视图，此命令只在%s中可用！"
 
-#: ultrablog/commands.py:268
+#: ultrablog/commands.py:288
 msgid "Not implemented yet !"
 msgstr "尚未实现！"
 
-#: ultrablog/commands.py:299 ultrablog/commands.py:440
+#: ultrablog/commands.py:319 ultrablog/commands.py:460
 msgid "Page NO. cannot be less than 1 !"
 msgstr "页码不能小于1！"
 
-#: ultrablog/commands.py:300 ultrablog/commands.py:441
+#: ultrablog/commands.py:320 ultrablog/commands.py:461
 msgid "Illegal page size (%s) !"
 msgstr "非法的分页行数“%s”！"
 
-#: ultrablog/commands.py:338 ultrablog/commands.py:478
+#: ultrablog/commands.py:358 ultrablog/commands.py:495
 msgid "No more posts found !"
 msgstr "找不到更多的文章！"
 
-#: ultrablog/commands.py:392
+#: ultrablog/commands.py:412
 msgid "No more pages found !"
 msgstr "找不到更多的页面！"
 
-#: ultrablog/commands.py:421
+#: ultrablog/commands.py:441
 msgid "No templates found !"
 msgstr "找不到更多的模板！"
 
-#: ultrablog/commands.py:536
+#: ultrablog/commands.py:550
 msgid "%d items substituted !"
 msgstr "已替换%d篇文章。"
 
-#: ultrablog/commands.py:550
+#: ultrablog/commands.py:564
 msgid "This buffer has not been modified !"
 msgstr "缓冲区未被修改！"
 
-#: ultrablog/commands.py:641
+#: ultrablog/commands.py:655
 msgid "%s sent as %s !"
 msgstr "%s已发布，状态：%s。"
 
-#: ultrablog/commands.py:716
+#: ultrablog/commands.py:730
 msgid "No post found !"
 msgstr "文章没找到！"
 
-#: ultrablog/commands.py:722
+#: ultrablog/commands.py:736
 msgid "No page found !"
 msgstr "页面没找到！"
 
-#: ultrablog/commands.py:771
+#: ultrablog/commands.py:785
 msgid "No template found !"
 msgstr "模板没找到！"
 
-#: ultrablog/commands.py:812
+#: ultrablog/commands.py:826
 msgid "Template \"%s\" exists !"
 msgstr "模板“%s”已存在！"
 
-#: ultrablog/commands.py:877
+#: ultrablog/commands.py:891
 msgid "Template '%s' is not found !"
 msgstr "模板“%s”没找到！"
 
-#: ultrablog/commands.py:914
+#: ultrablog/commands.py:908
+msgid ""
+"pywebkitgtk is missing or you have't restarted Vim after installation of "
+"this module !"
+msgstr ""
+
+#: ultrablog/commands.py:935
 msgid "Cannot find %s by key value %s !"
 msgstr "无法找到%s（ID:%s）！"
 
-#: ultrablog/commands.py:918
+#: ultrablog/commands.py:939
 msgid "Are you sure to delete %s %s \"%s\" ?"
 msgstr "是否确认删除%s%s“%s”？"
 
-#: ultrablog/commands.py:920
+#: ultrablog/commands.py:941
 msgid "Deletion canceled !"
 msgstr "删除已取消！"
 
-#: ultrablog/commands.py:944
+#: ultrablog/commands.py:965
 msgid "%s %s \"%s\" was deleted !"
 msgstr "%s%s“%s”已删除。"
 
-#: ultrablog/commands.py:962 ultrablog/commands.py:987
+#: ultrablog/commands.py:983 ultrablog/commands.py:1008
 msgid "This is not an item !"
 msgstr "这不是一个合法的元素！"
 
-#: ultrablog/commands.py:1059
+#: ultrablog/commands.py:1080
 msgid "Cannot find key value of the current buffer !"
 msgstr "无法找到当前内容的键值！"
+
+#: ultrablog/db.py:191
+msgid "Missing key %s in the settings list of UltraBlog.vim !"
+msgstr "UltraBlog.vim的设置中缺少选项“%s”！"
 
 #: ultrablog/util.py:40
 msgid "The buffer has been changed and cannot be cleared !"
@@ -187,10 +197,14 @@ msgstr "私有"
 msgid "pending"
 msgstr "审查"
 
-#: ultrablog/util.py:558
+#: ultrablog/util.py:562
 msgid "Missing module: python-markdown or python-markdown2 !"
 msgstr "缺少模块：python-markdown或python-markdown2！"
 
-#: ultrablog/util.py:567
+#: ultrablog/util.py:571
 msgid "Missing module: python-html2text !"
 msgstr "缺少模块：python-html2text！"
+
+#: ultrablog/viewer.py:12
+msgid "Previewer for UltraBlog.vim"
+msgstr "UltraBlog.vim浏览器"

@@ -21,6 +21,7 @@ Features
 * Full-text search by using regular expressions.
 * Full-text substitutions.
 * Full-text substitutions using regular expressions.
+* Built-in web browser, much faster to preview items.
 * Templates for previewing posts.
 * Event-driven system.
 * I18N.

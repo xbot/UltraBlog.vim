@@ -243,6 +243,8 @@ def ub_get_option(opt, deal=False):
         val = __get_positive(val, 10)
     elif opt == 'ub_debug':
         val = __get_positive(val, 0)
+    elif opt == 'ub_use_ubviewer':
+        val = __get_positive(val, 1)
 
     if deal:
         if opt == 'ub_tmpl_img_url':

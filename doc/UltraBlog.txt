@@ -6,7 +6,7 @@
 Author:      Lenin Lee   lenin.lee at gmail dot com       *UltraBlog_Author*
 URL:         http://0x3f.org/?p=1894                      *UltraBlog_URL*
 Description: Ultimate vim blogging plugin.                |UltraBlog_Motivation|
-Version:     3.4.0                                        |UltraBlog_History|
+Version:     3.5.0                                        |UltraBlog_History|
 License:     New BSD                                      |UltraBlog_License|
 Contribute:  Please report any bugs or suggestions        |UltraBlog_Bugs|
              to the address above.                        |UltraBlog_Future|
@@ -60,14 +60,17 @@ Enjoy Vim blogging !
   Features                                                 *UltraBlog_Features*
 ==============================================================================
 
-    * Event-driven system.
-    * Multiple syntax support: Markdown, HTML, reStructuredText, LaTeX,
-      Textile.
-    * Editor mode and client mode.
-    * Data is stored in a local SQLite database in client mode.
-    * Context search with keywords highlighted.
-    * Context search by using regular expressions.
-    * Templates for previewing posts.
+* Multiple syntax support: Markdown, HTML, reStructuredText, LaTeX, Textile.
+* Editor mode and client mode.
+* Data is stored in a local SQLite database in client mode.
+* Full-text search with keywords highlighted.
+* Full-text search by using regular expressions.
+* Full-text substitutions.
+* Full-text substitutions using regular expressions.
+* Templates for previewing posts.
+* Built-in web browser, much faster to preview items.
+* Event-driven system.
+* I18N.
 
 ==============================================================================
   Concepts                                                 *UltraBlog_Concepts*
@@ -155,14 +158,15 @@ UltraBlog.vim requires the following softwares to work normally:
 
     * Vim with python support enabled
     * SQLAlchemy 0.7 or newer
-    + python-markdown or python-markdown2
+    + python-markdown or python-markdown2 (Recommanded)
     + python-html2text
-    + pandoc or other
+    + pandoc or other (Only if syntaxes other than Markdown and HTML are used)
+    + pywebkitgtk (Only if the built-in web browser is used)
 
 The asterisk items are required at any condition.
 
 One of the two markdown modules of python is needed if you want to convert 
-posts/pages from Markdown to HTML.
+posts/pages from Markdown to HTML. python-markdown2 is recommanded.
 
 The python-html2text module is needed when converts buffers from HTML to
 Markdown.
@@ -170,6 +174,10 @@ Markdown.
 pandoc is requried when you need to do conversions between any pair of the 
 avaliable syntaxes. You can also specify you own external command as the 
 converter. For more information, refer to help messages of options below.
+
+pywebkitgtk is required only if you use the built-in web browser to preview
+items. You can still use the system default web browser like firefox or 
+chromium to do this job, just set the option |ub_use_ubviewer| to 0.
 
 ==============================================================================
   Keymappings                                           *UltraBlog_Keymappings*
@@ -338,8 +346,16 @@ All keymappings can be customized by setting some options, refer to
 :UBReplace needle replacement                                      *:UBReplace*
     Doing full-text substitutions.
 
+    Attention: Full-text substitutions will change contents of all matched 
+    posts/pages immediately when executed. You may need to backup your 
+    database file first.
+
 :UBRegexReplace regexp replacement                            *:UBRegexReplace*
     Doing full-text substitutions using regular expressions.
+
+    Attention: Full-text substitutions will change contents of all matched 
+    posts/pages immediately when executed. You may need to backup your 
+    database file first.
 
 :UBEnableDebug                                                 *:UBEnableDebug*
     Enable debugging.
@@ -585,6 +601,16 @@ ub_debug                                                             *ub_debug*
 
     let ub_debug = 0
 
+------------------------------------------------------------------------------
+
+ub_use_ubviewer                                               *ub_use_ubviewer*
+
+    Whether or not to use the built-in tiny browser to preview items.
+
+    By default, the value is:
+
+    let ub_use_ubviewer = 1
+
 ==============================================================================
   Future                                                     *UltraBlog_Future*
 ==============================================================================
@@ -606,6 +632,12 @@ Or submit issues with Github's issues tracker:
   History                                                   *UltraBlog_History*
 ==============================================================================
 
+3.5.0
+    * Feature: Add a tiny web browser to do previewing, which starts much 
+               faster than full-functional browsers like firefox and chromium.
+               The later ones are still supported. The matter that whether or
+               not to use the new previewer is controlled by a new option
+               |ub_use_ubviewer|.
 3.4.0
     * Feature: Add the command |:UBRegexSearch|, doing full-text searches with
                regular expressions !

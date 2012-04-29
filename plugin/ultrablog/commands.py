@@ -9,6 +9,10 @@ from db import *
 from util import *
 from events import *
 from eventqueue import UBEventQueue
+try:
+    import ultrablog.viewer as viewer
+except ImportError,e:
+    viewer = None
 
 def __ub_exception_handler(func):
     def __check(*args,**kwargs):
@@ -478,10 +482,7 @@ class UBCmdSearch(UBCommand):
         conn = dbe.connect()
         # Hook regexp function to sqlite3 if the current mode is regexp
         if self.isRegexp:
-            def regexp(expr, item):
-                reg = re.compile(expr)
-                return reg.search(item) is not None
-            conn.connection.create_function('REGEXP', 2, regexp)
+            conn.connection.create_function('REGEXP', 2, regexp_search)
         rslt = conn.execute(stmt)
         while True:
             row = rslt.fetchone()
@@ -901,7 +902,14 @@ class UBCmdPreview(UBCommand):
             fp.close()
             prv_url = "file://%s" % tmpfile
 
-        webbrowser.open(prv_url)
+        use_ubviewer = ub_get_option('ub_use_ubviewer')
+        if use_ubviewer == 1:
+            if viewer is None:
+                ub_echoerr(_("pywebkitgtk is missing or you have not restarted Vim after installation of this module !"))
+            else:
+                viewer.open(prv_url)
+        else:
+            webbrowser.open(prv_url)
 
 class UBCmdDelete(UBCommand):
     def __init__(self, itemType, itemKey, scope='local'):
