@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import xmlrpclib,socket
-import util
+import util as u
 
 try:
     import sqlalchemy
@@ -84,104 +84,101 @@ except ImportError, e:
     Template = None
 except:pass
 
-def ub_upgrade():
-    if db is not None:
-        conn = db.connect()
-        stmt = select([Post.type]).limit(1)
-        try:
-            conn.execute(stmt)
-        except OperationalError:
-            sql = "alter table post add type varchar(32) not null default 'post'"
-            conn.execute(sql)
+def ub_upgrade(db):
+    conn = db.connect()
+    stmt = select([Post.type]).limit(1)
+    try:
+        conn.execute(stmt)
+    except OperationalError:
+        sql = "alter table post add type varchar(32) not null default 'post'"
+        conn.execute(sql)
 
-        stmt = select([Post.status]).limit(1)
-        try:
-            conn.execute(stmt)
-        except OperationalError:
-            sql = "alter table post add status varchar(32) not null default 'draft'"
-            conn.execute(sql)
+    stmt = select([Post.status]).limit(1)
+    try:
+        conn.execute(stmt)
+    except OperationalError:
+        sql = "alter table post add status varchar(32) not null default 'draft'"
+        conn.execute(sql)
 
-        conn.close()
+    conn.close()
 
 def ub_init_template():
-    if db is not None:
-
-        sess = Session()
-        tmpl = sess.query(Template).filter(Template.name=='default').first()
-        if tmpl is None:
-            tmpl = Template()
-            tmpl.name = 'default'
-            tmpl.description = 'The default template for previewing drafts.'
-            tmpl.content = \
+    sess = Session()
+    tmpl = sess.query(Template).filter(Template.name=='default').first()
+    if tmpl is None:
+        tmpl = Template()
+        tmpl.name = 'default'
+        tmpl.description = 'The default template for previewing drafts.'
+        tmpl.content = \
 '''<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>%(title)s</title>
-        <style>
-            body
-            {
-                font-family: "DejaVu Sans YuanTi","YaHei Consolas Hybrid","Microsoft YaHei";
-                font-size: 14px;
-                background-color: #D9DADC;
-            }
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>%(title)s</title>
+    <style>
+        body
+        {
+            font-family: "DejaVu Sans YuanTi","YaHei Consolas Hybrid","Microsoft YaHei";
+            font-size: 14px;
+            background-color: #D9DADC;
+        }
 
-            code
-            {
-                font-family: "Monaco","YaHei Consolas Hybrid";
-                border: 1px solid #333;
-                background-color: #DCDCDC;
-                padding: 0px 3px;
-                margin: 0px 5px;
-            }
+        code
+        {
+            font-family: "Monaco","YaHei Consolas Hybrid";
+            border: 1px solid #333;
+            background-color: #DCDCDC;
+            padding: 0px 3px;
+            margin: 0px 5px;
+        }
 
-            pre
-            {
-                font-family: "Monaco","YaHei Consolas Hybrid";
-                border: 1px solid #333;
-                background-color: #B7D0DB;
-                padding: 10px;
-            }
+        pre
+        {
+            font-family: "Monaco","YaHei Consolas Hybrid";
+            border: 1px solid #333;
+            background-color: #B7D0DB;
+            padding: 10px;
+        }
 
-            table,td,th {border-collapse: collapse;}
-            table
-            {
-                border-left: 1px solid #333;
-                border-bottom: 1px solid #333;
-            }
-            td,th
-            {
-                border-top: 1px solid #333;
-                border-right: 1px solid #333;
-            }
-            th {background-color:#ebeff9;}
-            td {padding: 5px;}
+        table,td,th {border-collapse: collapse;}
+        table
+        {
+            border-left: 1px solid #333;
+            border-bottom: 1px solid #333;
+        }
+        td,th
+        {
+            border-top: 1px solid #333;
+            border-right: 1px solid #333;
+        }
+        th {background-color:#ebeff9;}
+        td {padding: 5px;}
 
-            blockquote {border: 1px dashed #333; background-color: #B7D0DB; padding: 10px;}
-            img {margin-left:auto;margin-right:auto;padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');}
-            a img{padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');}
+        blockquote {border: 1px dashed #333; background-color: #B7D0DB; padding: 10px;}
+        img {margin-left:auto;margin-right:auto;padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');}
+        a img{padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');}
 
-            .container {width: 80%%;margin:0px auto;padding:20px;background-color: #FFFFFF;}
-            .title {font-size: 24px; font-weight: bold;}
-            .content {}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="title">%(title)s</div>
-            <div class="content">
-                %(content)s
-            </div>
+        .container {width: 80%%;margin:0px auto;padding:20px;background-color: #FFFFFF;}
+        .title {font-size: 24px; font-weight: bold;}
+        .content {}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">%(title)s</div>
+        <div class="content">
+            %(content)s
         </div>
-    </body>
+    </div>
+</body>
 </html>'''
-            sess.add(tmpl)
-            sess.commit()
-            sess.close()
+        sess.add(tmpl)
+        sess.commit()
+        sess.close()
 
-def ub_set_mode():
+def ub_set_mode(db):
     '''Set editor mode according to the option ub_editor_mode
     '''
-    editor_mode = util.ub_get_option('ub_editor_mode')
+    editor_mode = u.ub_get_option('ub_editor_mode')
     if '1' == editor_mode:
         Session.configure(bind=db)
         Base.metadata.create_all(db)
@@ -189,23 +186,25 @@ def ub_set_mode():
 
 cfg = None
 try:
-    cfg = util.ub_get_blog_settings()
+    cfg = u.ub_get_blog_settings()
 except KeyError,e:
-    msg = 'Missing key %s in the settings list of UltraBlog.vim !' % str(e)
-    util.ub_echoerr(msg)
+    msg = _('Missing key %s in the settings list of UltraBlog.vim !') % str(e)
+    u.ub_echoerr(msg)
 except:
     pass
 
 try:
-    socket.setdefaulttimeout(util.ub_get_option('ub_socket_timeout'))
+    socket.setdefaulttimeout(u.ub_get_option('ub_socket_timeout'))
     api = xmlrpclib.ServerProxy(cfg.xmlrpc)
-    db = sqlalchemy.create_engine("sqlite:///%s" % cfg.dbf)
+    dbe = sqlalchemy.create_engine("sqlite:///%s" % cfg.dbf)
+    dbg_enabled = u.ub_get_option('ub_debug')
+    if dbg_enabled == 1: dbe.echo = True
 
-    Session.configure(bind=db)
-    Base.metadata.create_all(db)
+    Session.configure(bind=dbe)
+    Base.metadata.create_all(dbe)
 
-    ub_upgrade()
+    ub_upgrade(dbe)
     ub_init_template()
 except:
     api = None
-    db  = None
+    dbe  = None

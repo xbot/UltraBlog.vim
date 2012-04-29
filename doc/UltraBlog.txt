@@ -341,6 +341,15 @@ All keymappings can be customized by setting some options, refer to
 :UBRegexReplace regexp replacement                            *:UBRegexReplace*
     Doing full-text substitutions using regular expressions.
 
+:UBEnableDebug                                                 *:UBEnableDebug*
+    Enable debugging.
+
+:UBDisableDebug                                               *:UBDisableDebug*
+    Disable debugging.
+
+:UBToggleDebug                                                 *:UBToggleDebug*
+    Toggle debugging status.
+
 ==============================================================================
   Options                                                   *UltraBlog_Options*
 ==============================================================================
@@ -562,6 +571,20 @@ ub_default_template                                       *ub_default_template*
 
     let ub_default_template="default"
 
+------------------------------------------------------------------------------
+
+ub_debug                                                             *ub_debug*
+
+    Whether or not to enable debugging. Setting this option to 1 enables 
+    debugging and 0 disables it.
+
+    In debug mode, SQL statements being executed will be displayed and so are
+    all stack traces of exceptions raised.
+
+    By default, the value is:
+
+    let ub_debug = 0
+
 ==============================================================================
   Future                                                     *UltraBlog_Future*
 ==============================================================================
@@ -589,6 +612,9 @@ Or submit issues with Github's issues tracker:
     * Feature: Add the command |:UBReplace|, doing full-text substitutions.
     * Feature: Add the command |:UBRegexReplace|, doing full-text substitutions
                with regular expressions.
+    * Feature: Add commands |:UBEnableDebug|, |:UBDisableDebug|,
+               |:UBToggleDebug| and an option |ub_debug|. In debug mode, SQL
+               statements and stack traces of exceptions will be displayed.
     * Change:  Undo keywords highlighting after executing |:UBList|.
     * Bugfix:  Exceptions raised when opening the current item under cursor
                in item lists if the option |ub_hotkey_save_current_item| has

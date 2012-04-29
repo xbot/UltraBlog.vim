@@ -12,6 +12,8 @@ from eventqueue import UBEventQueue
 
 def __ub_exception_handler(func):
     def __check(*args,**kwargs):
+        dbg_enabled = ub_get_option('ub_debug')
+        if dbg_enabled == 1: return func(*args,**kwargs)
         try:
             return func(*args,**kwargs)
         except UBException, e:
@@ -44,6 +46,20 @@ def __ub_enc_check(func):
                 vim.command('setl nomodified')
         return func(*args, **kw)
     return __check
+
+def ub_debug(mode):
+    """Set debug mode
+    0: Disable debug mode
+    1: Enable debug mode
+    2: Toggle debug status
+    """
+    if mode in [0,1]: dbg_status = mode
+    else:
+        dbg_enabled = ub_get_option('ub_debug')
+        dbg_status = (dbg_enabled == 0) and 1 or 0
+    vim.command("let g:ub_debug = %d" % dbg_status)
+    if dbg_status == 1: dbe.echo = True
+    else: dbe.echo = False
 
 @__ub_exception_handler
 def ub_list_items(item_type='post', scope='local', page_size=None, page_no=None):
@@ -178,7 +194,7 @@ class UBCommand(object):
     def __init__(self, isContentAware=False):
         self.checkPrerequisites()
         # Set editor mode if the corresponding option has been set
-        ub_set_mode()
+        ub_set_mode(dbe)
 
         self.isContentAware = isContentAware
         self.scope = 'local'
@@ -205,7 +221,7 @@ class UBCommand(object):
             raise UBException(_('Cannot create database objects !'))
         if cfg is None: raise UBException(_('Settings of UltraBlog.vim is missing or invalid !'))
         if api is None: raise UBException(_('Cannot initiate API !'))
-        if db is None: raise UBException(_('Cannot connect to database !'))
+        if dbe is None: raise UBException(_('Cannot connect to database !'))
 
     def checkItemType(self, itemType=None):
         ''' Check if the item type is among the available ones
@@ -325,7 +341,7 @@ class UBCmdList(UBCommand):
         )
         stmt = select([ua]).limit(self.pageSize).offset(self.pageSize*(self.pageNo-1))
 
-        conn = db.connect()
+        conn = dbe.connect()
         rslt = conn.execute(stmt)
         while True:
             row = rslt.fetchone()
@@ -379,7 +395,7 @@ class UBCmdList(UBCommand):
                 .where(tbl.c.post_id!=None).where(tbl.c.type=='page').order_by(tbl.c.post_id.desc())])
         )
 
-        conn = db.connect()
+        conn = dbe.connect()
         rslt = conn.execute(ua)
         while True:
             row = rslt.fetchone()
@@ -459,7 +475,7 @@ class UBCmdSearch(UBCommand):
             and_(*conds)
         ).limit(self.pageSize).offset(self.pageSize*(self.pageNo-1)).order_by(tbl.c.status.asc(),tbl.c.post_id.desc())
 
-        conn = db.connect()
+        conn = dbe.connect()
         # Hook regexp function to sqlite3 if the current mode is regexp
         if self.isRegexp:
             def regexp(expr, item):
@@ -509,13 +525,10 @@ class UBCmdReplace(UBCommand):
         UBCmdReplace.doDefault()
 
     def _exec(self):
-        conn = db.connect()
+        conn = dbe.connect()
         # Hook regexp function to sqlite3 if the current mode is regexp
         if self.isRegexp:
-            def regexp(expr, item):
-                reg = re.compile(expr)
-                return reg.search(item) is not None
-            conn.connection.create_function('REGEXP', 2, regexp)
+            conn.connection.create_function('REGEXP', 2, regexp_search)
             conn.connection.create_function('regex_replace', 3, regex_replace)
             sql_replace = "update post set title=regex_replace(title,:needle,:replacement),content=regex_replace(content,:needle,:replacement)"
             sql_count = "select count(*) from post where title regexp :needle or content regexp :needle"

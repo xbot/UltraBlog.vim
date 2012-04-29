@@ -241,6 +241,8 @@ def ub_get_option(opt, deal=False):
         val = __get_positive(val, 30)
     elif opt == 'ub_socket_timeout':
         val = __get_positive(val, 10)
+    elif opt == 'ub_debug':
+        val = __get_positive(val, 0)
 
     if deal:
         if opt == 'ub_tmpl_img_url':
@@ -616,10 +618,11 @@ def raw(text):
     return "".join([escape_dict.get(char,char) for char in text])
 
 def regex_replace(string, expr, repl):
+    """Do substitutions on the string for repls matching the expr"""
     r = re.compile(raw(expr))
     return r.sub(repl, string)
 
-if __name__ == '__main__':
-    pass
-    conn.connection.create_function('regex_replace', 3, regex_replace)
-    stmt = "update post set content=regex_replace(content,'abc', 'lenin')"
+def regexp_search(expr, item):
+    """Check if the item has a sub-string which matches the expr"""
+    reg = re.compile(expr)
+    return reg.search(item) is not None

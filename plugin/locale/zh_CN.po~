@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-04-15 19:07+CST\n"
+"POT-Creation-Date: 2012-04-28 10:23+CST\n"
 "PO-Revision-Date: 2012-04-15 17:10+0800\n"
 "Last-Translator:  <lenin.lee@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -15,25 +15,141 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: ultrablog/commands.py:581
+#: ultrablog/commands.py:135 ultrablog/util.py:388
+msgid "Invalid view !"
+msgstr "错误的视图！"
+
+#: ultrablog/commands.py:137
+msgid "File not exists !"
+msgstr "文件不存在！"
+
+#: ultrablog/commands.py:203
+msgid "Cannot find SQLAlchemy !"
+msgstr "SQLAlchemy未安装！"
+
+#: ultrablog/commands.py:205
+msgid "Cannot create database objects !"
+msgstr "无法创建数据库对象！"
+
+#: ultrablog/commands.py:206
+msgid "Settings of UltraBlog.vim is missing or invalid !"
+msgstr "UltraBlog.vim的配置信息不正确或丢失！"
+
+#: ultrablog/commands.py:207
+msgid "Cannot initiate API !"
+msgstr "无法初始化博客接口！"
+
+#: ultrablog/commands.py:208
+msgid "Cannot connect to database !"
+msgstr "无法连接数据库！"
+
+#: ultrablog/commands.py:215
+msgid "Unknow item type, available types are: post, page and tmpl !"
+msgstr "元素类型未知，合法类型有：post, page, tmpl！"
+
+#: ultrablog/commands.py:229
+msgid "Invalid scope !"
+msgstr "未知的作用域！"
+
+#: ultrablog/commands.py:237
+msgid "Unknown syntax, valid syntaxes are %s"
+msgstr "语法类型未知，合法类型有：%s"
+
+#: ultrablog/commands.py:246
+msgid "Invalid view, this command is only allowed in %s !"
+msgstr "错误的视图，此命令只在%s中可用！"
+
+#: ultrablog/commands.py:268
+msgid "Not implemented yet !"
+msgstr "尚未实现！"
+
+#: ultrablog/commands.py:299 ultrablog/commands.py:440
+msgid "Page NO. cannot be less than 1 !"
+msgstr "页码不能小于1！"
+
+#: ultrablog/commands.py:300 ultrablog/commands.py:441
+msgid "Illegal page size (%s) !"
+msgstr "非法的分页行数“%s”！"
+
+#: ultrablog/commands.py:338 ultrablog/commands.py:478
+msgid "No more posts found !"
+msgstr "找不到更多的文章！"
+
+#: ultrablog/commands.py:392
+msgid "No more pages found !"
+msgstr "找不到更多的页面！"
+
+#: ultrablog/commands.py:421
+msgid "No templates found !"
+msgstr "找不到更多的模板！"
+
+#: ultrablog/commands.py:536
+msgid "%d items substituted !"
+msgstr "已替换%d篇文章。"
+
+#: ultrablog/commands.py:550
+msgid "This buffer has not been modified !"
+msgstr "缓冲区未被修改！"
+
+#: ultrablog/commands.py:641
 msgid "%s sent as %s !"
 msgstr "%s已发布，状态：%s。"
 
-#: ultrablog/commands.py:854
+#: ultrablog/commands.py:716
+msgid "No post found !"
+msgstr "文章没找到！"
+
+#: ultrablog/commands.py:722
+msgid "No page found !"
+msgstr "页面没找到！"
+
+#: ultrablog/commands.py:771
+msgid "No template found !"
+msgstr "模板没找到！"
+
+#: ultrablog/commands.py:812
+msgid "Template \"%s\" exists !"
+msgstr "模板“%s”已存在！"
+
+#: ultrablog/commands.py:877
+msgid "Template '%s' is not found !"
+msgstr "模板“%s”没找到！"
+
+#: ultrablog/commands.py:914
 msgid "Cannot find %s by key value %s !"
 msgstr "无法找到%s（ID:%s）！"
 
-#: ultrablog/commands.py:858
+#: ultrablog/commands.py:918
 msgid "Are you sure to delete %s %s \"%s\" ?"
 msgstr "是否确认删除%s%s“%s”？"
 
-#: ultrablog/commands.py:860
+#: ultrablog/commands.py:920
 msgid "Deletion canceled !"
 msgstr "删除已取消！"
 
-#: ultrablog/commands.py:884
+#: ultrablog/commands.py:944
 msgid "%s %s \"%s\" was deleted !"
 msgstr "%s%s“%s”已删除。"
+
+#: ultrablog/commands.py:962 ultrablog/commands.py:987
+msgid "This is not an item !"
+msgstr "这不是一个合法的元素！"
+
+#: ultrablog/commands.py:1059
+msgid "Cannot find key value of the current buffer !"
+msgstr "无法找到当前内容的键值！"
+
+#: ultrablog/util.py:40
+msgid "The buffer has been changed and cannot be cleared !"
+msgstr "内容已被修改，无法清空！"
+
+#: ultrablog/util.py:55
+msgid "Invalid status !"
+msgstr "非法的状态！"
+
+#: ultrablog/util.py:62
+msgid "'%s' is a reserved word !"
+msgstr "“%s”是一个保留字！"
 
 #: ultrablog/util.py:142
 msgid "template"
@@ -70,3 +186,11 @@ msgstr "私有"
 #: ultrablog/util.py:168
 msgid "pending"
 msgstr "审查"
+
+#: ultrablog/util.py:558
+msgid "Missing module: python-markdown or python-markdown2 !"
+msgstr "缺少模块：python-markdown或python-markdown2！"
+
+#: ultrablog/util.py:567
+msgid "Missing module: python-html2text !"
+msgstr "缺少模块：python-html2text！"

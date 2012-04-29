@@ -192,6 +192,9 @@ command! -nargs=+ UBFind exec('py ub_search(0, 1, <f-args>)')
 command! -nargs=+ UBRegexSearch exec('py ub_search(1, 1, <f-args>)')
 command! -nargs=+ UBReplace exec('py ub_replace(0, <f-args>)')
 command! -nargs=+ UBRegexReplace exec('py ub_replace(1, <f-args>)')
+command! -nargs=0 UBEnableDebug exec('py ub_debug(1)')
+command! -nargs=0 UBDisableDebug exec('py ub_debug(0)')
+command! -nargs=0 UBToggleDebug exec('py ub_debug(2)')
 
 " Auto-commands
 autocmd! BufEnter * py __ub_on_buffer_enter()
@@ -212,5 +215,4 @@ def __ub_on_buffer_enter():
     if ub_is_view_outdated('%'):
         ub_refresh_current_view()
         ub_set_view_outdated('%', False)
-
 EOF
