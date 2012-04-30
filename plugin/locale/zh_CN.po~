@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-04-30 01:24+CST\n"
+"POT-Creation-Date: 2012-04-30 01:26+CST\n"
 "PO-Revision-Date: 2012-04-15 17:10+0800\n"
 "Last-Translator:  <lenin.lee@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -117,9 +117,9 @@ msgstr "模板“%s”没找到！"
 
 #: ultrablog/commands.py:908
 msgid ""
-"pywebkitgtk is missing or you have't restarted Vim after installation of "
+"pywebkitgtk is missing or you have not restarted Vim after installation of "
 "this module !"
-msgstr ""
+msgstr "pywebkitgtk未安装或安装后没有重启Vim！"
 
 #: ultrablog/commands.py:935
 msgid "Cannot find %s by key value %s !"

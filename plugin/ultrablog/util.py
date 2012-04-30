@@ -196,12 +196,20 @@ def ub_get_option(opt, deal=False):
     '''Get the value of an UltraBlog option
     '''
     def __get_positive(val, default):
+        """Convert val to integer and return it if val is a positive integer or a digit string representing a positive integer,
+        or default will be returned.
+        """
         if (type(val) is types.IntType and val>0) \
                 or (type(val) is types.StringType and val.isdigit() and int(val)>0):
             val = int(val)
         else:
             val = default
         return val
+    def __get_boolean(val, default):
+        """Return True if val is 1 or '1', or return False if val is 0 or '0', or default will be returned."""
+        if val in [1,'1']: return True
+        elif val in [0,'0']: return False
+        else: return default
 
     val = None
     if vim.eval('exists("%s")' % opt) == '1':
@@ -242,9 +250,11 @@ def ub_get_option(opt, deal=False):
     elif opt == 'ub_socket_timeout':
         val = __get_positive(val, 10)
     elif opt == 'ub_debug':
-        val = __get_positive(val, 0)
+        val = __get_boolean(val, False)
     elif opt == 'ub_use_ubviewer':
-        val = __get_positive(val, 1)
+        val = __get_boolean(val, True)
+    elif opt == 'ub_save_after_opened':
+        val = __get_boolean(val, False)
 
     if deal:
         if opt == 'ub_tmpl_img_url':
@@ -256,8 +266,6 @@ def ub_get_option(opt, deal=False):
             else:
                 val['syntax'] = ''
                 val['tmpl'] = tmp[0]
-        elif opt == 'ub_save_after_opened':
-            val = ('1'==val and True) or False
 
     return val
 
@@ -628,3 +636,9 @@ def regexp_search(expr, item):
     """Check if the item has a sub-string which matches the expr"""
     reg = re.compile(expr)
     return reg.search(item) is not None
+
+def is_in_console():
+    """Return True if invoked under console"""
+    if os.name == 'posix' and os.environ.has_key('DISPLAY') is False:
+        return True
+    return False

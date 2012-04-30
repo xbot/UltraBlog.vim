@@ -9,15 +9,18 @@ from db import *
 from util import *
 from events import *
 from eventqueue import UBEventQueue
-try:
-    import ultrablog.viewer as viewer
-except ImportError,e:
+
+if not is_in_console() and ub_get_option('ub_use_ubviewer') is True:
+    """Do not import ultrablog.viewer if is in console or the option ub_use_ubviewer has been set to 0"""
     viewer = None
+    try:
+        import ultrablog.viewer as viewer
+    except ImportError: pass
 
 def __ub_exception_handler(func):
     def __check(*args,**kwargs):
         dbg_enabled = ub_get_option('ub_debug')
-        if dbg_enabled == 1: return func(*args,**kwargs)
+        if dbg_enabled is True: return func(*args,**kwargs)
         try:
             return func(*args,**kwargs)
         except UBException, e:
@@ -60,7 +63,7 @@ def ub_debug(mode):
     if mode in [0,1]: dbg_status = mode
     else:
         dbg_enabled = ub_get_option('ub_debug')
-        dbg_status = (dbg_enabled == 0) and 1 or 0
+        dbg_status = (dbg_enabled is False) and 1 or 0
     vim.command("let g:ub_debug = %d" % dbg_status)
     if dbg_status == 1: dbe.echo = True
     else: dbe.echo = False
@@ -328,7 +331,7 @@ class UBCmdList(UBCommand):
         vim.command('call UBClearUndo()')
         vim.command('setl nomodified')
         vim.command("setl nomodifiable")
-        vim.command("setl nohls")
+        vim.command("nohl")
         vim.current.window.cursor = (2, 0)
 
     def _listLocalPosts(self):
@@ -704,7 +707,7 @@ class UBCmdOpen(UBCommand):
         self.itemType = itemType
         self.scope = scope
         self.viewType = viewType
-        self.saveIt = ub_get_option('ub_save_after_opened', True)
+        self.saveIt = ub_get_option('ub_save_after_opened')
         self.metaData = None
         self.item = None
 
@@ -903,7 +906,10 @@ class UBCmdPreview(UBCommand):
             prv_url = "file://%s" % tmpfile
 
         use_ubviewer = ub_get_option('ub_use_ubviewer')
-        if use_ubviewer == 1:
+        if use_ubviewer is True:
+            if is_in_console():
+                ub_echoerr(_('You are currently in console and no graphical environment is available !'))
+                return
             if viewer is None:
                 ub_echoerr(_("pywebkitgtk is missing or you have not restarted Vim after installation of this module !"))
             else:

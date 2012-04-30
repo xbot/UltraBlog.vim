@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2012-04-30 01:26+CST\n"
+"POT-Creation-Date: 2012-04-30 13:29+CST\n"
 "PO-Revision-Date: 2012-04-15 17:10+0800\n"
 "Last-Translator:  <lenin.lee@gmail.com>\n"
 "Language-Team: English\n"
@@ -16,137 +16,142 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ultrablog/commands.py:155 ultrablog/util.py:392
+#: ultrablog/commands.py:157 ultrablog/util.py:400
 msgid "Invalid view !"
 msgstr ""
 
-#: ultrablog/commands.py:157
+#: ultrablog/commands.py:159
 msgid "File not exists !"
 msgstr ""
 
-#: ultrablog/commands.py:223
+#: ultrablog/commands.py:225
 msgid "Cannot find SQLAlchemy !"
 msgstr ""
 
-#: ultrablog/commands.py:225
+#: ultrablog/commands.py:227
 msgid "Cannot create database objects !"
 msgstr ""
 
-#: ultrablog/commands.py:226
+#: ultrablog/commands.py:228
 msgid "Settings of UltraBlog.vim is missing or invalid !"
 msgstr ""
 
-#: ultrablog/commands.py:227
+#: ultrablog/commands.py:229
 msgid "Cannot initiate API !"
 msgstr ""
 
-#: ultrablog/commands.py:228
+#: ultrablog/commands.py:230
 msgid "Cannot connect to database !"
 msgstr ""
 
-#: ultrablog/commands.py:235
+#: ultrablog/commands.py:237
 msgid "Unknow item type, available types are: post, page and tmpl !"
 msgstr ""
 
-#: ultrablog/commands.py:249
+#: ultrablog/commands.py:251
 msgid "Invalid scope !"
 msgstr ""
 
-#: ultrablog/commands.py:257
+#: ultrablog/commands.py:259
 msgid "Unknown syntax, valid syntaxes are %s"
 msgstr ""
 
-#: ultrablog/commands.py:266
+#: ultrablog/commands.py:268
 msgid "Invalid view, this command is only allowed in %s !"
 msgstr ""
 
-#: ultrablog/commands.py:288
+#: ultrablog/commands.py:290
 msgid "Not implemented yet !"
 msgstr ""
 
-#: ultrablog/commands.py:319 ultrablog/commands.py:460
+#: ultrablog/commands.py:321 ultrablog/commands.py:462
 msgid "Page NO. cannot be less than 1 !"
 msgstr ""
 
-#: ultrablog/commands.py:320 ultrablog/commands.py:461
+#: ultrablog/commands.py:322 ultrablog/commands.py:463
 msgid "Illegal page size (%s) !"
 msgstr ""
 
-#: ultrablog/commands.py:358 ultrablog/commands.py:495
+#: ultrablog/commands.py:360 ultrablog/commands.py:497
 msgid "No more posts found !"
 msgstr ""
 
-#: ultrablog/commands.py:412
+#: ultrablog/commands.py:414
 msgid "No more pages found !"
 msgstr ""
 
-#: ultrablog/commands.py:441
+#: ultrablog/commands.py:443
 msgid "No templates found !"
 msgstr ""
 
-#: ultrablog/commands.py:550
+#: ultrablog/commands.py:552
 msgid "%d items substituted !"
 msgstr ""
 
-#: ultrablog/commands.py:564
+#: ultrablog/commands.py:566
 msgid "This buffer has not been modified !"
 msgstr ""
 
-#: ultrablog/commands.py:655
+#: ultrablog/commands.py:657
 msgid "%s sent as %s !"
 msgstr ""
 
-#: ultrablog/commands.py:730
+#: ultrablog/commands.py:732
 msgid "No post found !"
 msgstr ""
 
-#: ultrablog/commands.py:736
+#: ultrablog/commands.py:738
 msgid "No page found !"
 msgstr ""
 
-#: ultrablog/commands.py:785
+#: ultrablog/commands.py:787
 msgid "No template found !"
 msgstr ""
 
-#: ultrablog/commands.py:826
+#: ultrablog/commands.py:828
 msgid "Template \"%s\" exists !"
 msgstr ""
 
-#: ultrablog/commands.py:891
+#: ultrablog/commands.py:893
 msgid "Template '%s' is not found !"
 msgstr ""
 
-#: ultrablog/commands.py:908
+#: ultrablog/commands.py:910
+msgid ""
+"You are currently in console and no graphical environment is available !"
+msgstr ""
+
+#: ultrablog/commands.py:913
 msgid ""
 "pywebkitgtk is missing or you have not restarted Vim after installation of "
 "this module !"
 msgstr ""
 
-#: ultrablog/commands.py:935
+#: ultrablog/commands.py:940
 msgid "Cannot find %s by key value %s !"
 msgstr ""
 
-#: ultrablog/commands.py:939
+#: ultrablog/commands.py:944
 msgid "Are you sure to delete %s %s \"%s\" ?"
 msgstr ""
 
-#: ultrablog/commands.py:941
+#: ultrablog/commands.py:946
 msgid "Deletion canceled !"
 msgstr ""
 
-#: ultrablog/commands.py:965
+#: ultrablog/commands.py:970
 msgid "%s %s \"%s\" was deleted !"
 msgstr ""
 
-#: ultrablog/commands.py:983 ultrablog/commands.py:1008
+#: ultrablog/commands.py:988 ultrablog/commands.py:1013
 msgid "This is not an item !"
 msgstr ""
 
-#: ultrablog/commands.py:1080
+#: ultrablog/commands.py:1085
 msgid "Cannot find key value of the current buffer !"
 msgstr ""
 
-#: ultrablog/db.py:191
+#: ultrablog/db.py:180
 msgid "Missing key %s in the settings list of UltraBlog.vim !"
 msgstr ""
 
@@ -198,11 +203,11 @@ msgstr ""
 msgid "pending"
 msgstr ""
 
-#: ultrablog/util.py:562
+#: ultrablog/util.py:570
 msgid "Missing module: python-markdown or python-markdown2 !"
 msgstr ""
 
-#: ultrablog/util.py:571
+#: ultrablog/util.py:579
 msgid "Missing module: python-html2text !"
 msgstr ""
 

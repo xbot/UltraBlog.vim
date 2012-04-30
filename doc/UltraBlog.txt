@@ -607,6 +607,10 @@ ub_use_ubviewer                                               *ub_use_ubviewer*
 
     Whether or not to use the built-in tiny browser to preview items.
 
+    Note that GTK warnings may be displayed if you start Vim or GVim in your
+    terminal emulator due to GTK or others' bugs. If this bothers you, set
+    this option to 0.
+
     By default, the value is:
 
     let ub_use_ubviewer = 1
@@ -638,6 +642,9 @@ Or submit issues with Github's issues tracker:
                The later ones are still supported. The matter that whether or
                not to use the new previewer is controlled by a new option
                |ub_use_ubviewer|.
+    * Bugfix:  Issue 7: Keywords highlighting is disabled in item lists, even 
+               if searches are made manually.
+
 3.4.0
     * Feature: Add the command |:UBRegexSearch|, doing full-text searches with
                regular expressions !

@@ -115,24 +115,19 @@ def ub_init_template():
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>%(title)s</title>
     <style>
-        body
-        {
+        body {
             font-family: "DejaVu Sans YuanTi","YaHei Consolas Hybrid","Microsoft YaHei";
             font-size: 14px;
             background-color: #D9DADC;
         }
-
-        code
-        {
+        code {
             font-family: "Monaco","YaHei Consolas Hybrid";
             border: 1px solid #333;
             background-color: #DCDCDC;
             padding: 0px 3px;
             margin: 0px 5px;
         }
-
-        pre
-        {
+        pre {
             font-family: "Monaco","YaHei Consolas Hybrid";
             border: 1px solid #333;
             background-color: #B7D0DB;
@@ -140,16 +135,8 @@ def ub_init_template():
         }
 
         table,td,th {border-collapse: collapse;}
-        table
-        {
-            border-left: 1px solid #333;
-            border-bottom: 1px solid #333;
-        }
-        td,th
-        {
-            border-top: 1px solid #333;
-            border-right: 1px solid #333;
-        }
+        table { border-left: 1px solid #333; border-bottom: 1px solid #333; }
+        td,th { border-top: 1px solid #333; border-right: 1px solid #333; }
         th {background-color:#ebeff9;}
         td {padding: 5px;}
 
@@ -157,15 +144,17 @@ def ub_init_template():
         img {margin-left:auto;margin-right:auto;padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');}
         a img{padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');}
 
+        li { padding:5px; }
+
         .container {width: 80%%;margin:0px auto;padding:20px;background-color: #FFFFFF;}
-        .title {font-size: 24px; font-weight: bold;}
-        .content {}
+        .postTitle {font-size: 24px; font-weight: bold;}
+        .postContent {}
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="title">%(title)s</div>
-        <div class="content">
+        <div class="postTitle">%(title)s</div>
+        <div class="postContent">
             %(content)s
         </div>
     </div>
@@ -197,8 +186,7 @@ try:
     socket.setdefaulttimeout(u.ub_get_option('ub_socket_timeout'))
     api = xmlrpclib.ServerProxy(cfg.xmlrpc)
     dbe = sqlalchemy.create_engine("sqlite:///%s" % cfg.dbf)
-    dbg_enabled = u.ub_get_option('ub_debug')
-    if dbg_enabled == 1: dbe.echo = True
+    dbe.echo = u.ub_get_option('ub_debug')
 
     Session.configure(bind=dbe)
     Base.metadata.create_all(dbe)
