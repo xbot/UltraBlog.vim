@@ -636,6 +636,12 @@ Or submit issues with Github's issues tracker:
   History                                                   *UltraBlog_History*
 ==============================================================================
 
+.....
+    * Feature: Add new options |ub_viewer_width| and |ub_viewer_width|, which
+               define the default width and height of the built-in web browser.
+    * Change:  The default width of the built-in web browser is now changed to
+               900px.
+
 3.5.0
     * Feature: Add a tiny web browser to do previewing, which starts much 
                faster than full-functional browsers like firefox and chromium.

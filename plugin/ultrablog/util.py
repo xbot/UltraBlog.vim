@@ -249,6 +249,10 @@ def ub_get_option(opt, deal=False):
         val = __get_positive(val, 30)
     elif opt == 'ub_socket_timeout':
         val = __get_positive(val, 10)
+    elif opt == 'ub_viewer_width':
+        val = __get_positive(val, 900)
+    elif opt == 'ub_viewer_height':
+        val = __get_positive(val, 600)
     elif opt == 'ub_debug':
         val = __get_boolean(val, False)
     elif opt == 'ub_use_ubviewer':
