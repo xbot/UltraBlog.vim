@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-import vim, xmlrpclib, webbrowser, re, tempfile, os, mimetypes, inspect, gettext
+import vim, xmlrpclib, re, tempfile, os, mimetypes, inspect, gettext
 gettext.install('ultrablog', os.path.join(os.path.dirname(__file__), os.path.pardir, 'locale'))
 
 from exceptions import *
@@ -10,11 +10,12 @@ from util import *
 from events import *
 from eventqueue import UBEventQueue
 
+import webbrowser
+ubviewer = None
 if not is_in_console() and ub_get_option('ub_use_ubviewer') is True:
     """Do not import ultrablog.viewer if is in console or the option ub_use_ubviewer has been set to 0"""
-    viewer = None
     try:
-        import ultrablog.viewer as viewer
+        import ultrablog.viewer as ubviewer
     except ImportError: pass
 
 def __ub_exception_handler(func):
@@ -910,10 +911,10 @@ class UBCmdPreview(UBCommand):
             if is_in_console():
                 ub_echoerr(_('You are currently in console and no graphical environment is available !'))
                 return
-            if viewer is None:
+            if ubviewer is None:
                 ub_echoerr(_("pywebkitgtk is missing or you have not restarted Vim after installation of this module !"))
             else:
-                viewer.open(prv_url)
+                ubviewer.open(prv_url, ub_get_option('ub_viewer_width'), ub_get_option('ub_viewer_height'))
         else:
             webbrowser.open(prv_url)
 
