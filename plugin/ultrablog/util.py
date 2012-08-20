@@ -358,7 +358,7 @@ def ub_get_blog_settings():
     '''Get the blog settings from vimrc and raise exception if none found
     '''
     class UBConfiguration:
-        homepage = 'http://0x3f.org/?p=1894'
+        homepage = 'http://0x3f.org/blog/ultrablog-as-an-ultimate-vim-blogging-plugin/'
 
         def __init__(self, rawSettings):
             self.loginName = rawSettings['login_name'].strip()

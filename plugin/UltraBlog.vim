@@ -2,7 +2,7 @@
 " File:        UltraBlog.vim
 " Description: Ultimate vim blogging plugin that manages web logs
 " Author:      Lenin Lee <lenin.lee at gmail dot com>
-" Version:     3.5.0
+" Version:     3.6.0
 " License:     The New BSD License
 "
 " ============================================================================
@@ -197,7 +197,7 @@ command! -nargs=0 UBDisableDebug exec('py ub_debug(0)')
 command! -nargs=0 UBToggleDebug exec('py ub_debug(2)')
 
 " Auto-commands
-autocmd! BufEnter * py __ub_on_buffer_enter()
+autocmd BufEnter * py __ub_on_buffer_enter()
 
 python <<EOF
 # -*- coding: utf-8 -*-

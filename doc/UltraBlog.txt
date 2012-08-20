@@ -6,7 +6,7 @@
 Author:      Lenin Lee   lenin.lee at gmail dot com       *UltraBlog_Author*
 URL:         http://0x3f.org/?p=1894                      *UltraBlog_URL*
 Description: Ultimate vim blogging plugin.                |UltraBlog_Motivation|
-Version:     3.5.0                                        |UltraBlog_History|
+Version:     3.6.0                                        |UltraBlog_History|
 License:     New BSD                                      |UltraBlog_License|
 Contribute:  Please report any bugs or suggestions        |UltraBlog_Bugs|
              to the address above.                        |UltraBlog_Future|
@@ -636,11 +636,12 @@ Or submit issues with Github's issues tracker:
   History                                                   *UltraBlog_History*
 ==============================================================================
 
-.....
+3.6.0
     * Feature: Add new options |ub_viewer_width| and |ub_viewer_width|, which
                define the default width and height of the built-in web browser.
     * Change:  The default width of the built-in web browser is now changed to
                900px.
+    * Bugfix:  Fix the overwriting to auto commands created by other plugins.
 
 3.5.0
     * Feature: Add a tiny web browser to do previewing, which starts much 
