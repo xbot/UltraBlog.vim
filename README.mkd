@@ -29,7 +29,7 @@ Features
 Tips
 --------
 
-* [Enable Code Snippet Highlighting For UltraBlog.vim Templates](http://0x3f.org/?p=2103)
+* [Enable Code Snippet Highlighting For UltraBlog.vim Templates](http://0x3f.org/blog/enable-code-snippet-highlighting-for-ultrablog-vim-templates/)
 
 Bug tracker
 --------
@@ -46,7 +46,7 @@ Author
 * http://0x3f.org
 * https://twitter.com/leninlee
 * https://github.com/xbot
-* http://0x3f.org/?p=1894
+* http://0x3f.org/blog/ultrablog-as-an-ultimate-vim-blogging-plugin/
 * http://www.vim.org/scripts/script.php?script_id=3532
 
 License

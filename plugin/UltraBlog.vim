@@ -2,7 +2,7 @@
 " File:        UltraBlog.vim
 " Description: Ultimate vim blogging plugin that manages web logs
 " Author:      Lenin Lee <lenin.lee at gmail dot com>
-" Version:     3.5.0
+" Version:     3.6.0
 " License:     The New BSD License
 "
 " ============================================================================
