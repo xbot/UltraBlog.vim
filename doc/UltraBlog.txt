@@ -4,7 +4,7 @@
 ==============================================================================
 
 Author:      Lenin Lee   lenin.lee at gmail dot com       *UltraBlog_Author*
-URL:         http://0x3f.org/?p=1894                      *UltraBlog_URL*
+URL:         http://0x3f.org                              *UltraBlog_URL*
 Description: Ultimate vim blogging plugin.                |UltraBlog_Motivation|
 Version:     3.5.0                                        |UltraBlog_History|
 License:     New BSD                                      |UltraBlog_License|
@@ -376,6 +376,7 @@ ub_blog                                                               *ub_blog*
         let ub_blog = {'login_name':'admin',
                     \'password':'pass2011',
                     \'url':'http://www.sample.com/',
+                    \'xmlrpc_uri':'xmlrpc.php',
                     \'db':'$VIM/UltraBlog.db'
                     \}
     Keys:
@@ -641,6 +642,8 @@ Or submit issues with Github's issues tracker:
                define the default width and height of the built-in web browser.
     * Change:  The default width of the built-in web browser is now changed to
                900px.
+    * Change:  Add an option 'xmlrpc_uri' in the initial settings, which make
+               it possible for users to set custom XMLRPC access point.
 
 3.5.0
     * Feature: Add a tiny web browser to do previewing, which starts much 

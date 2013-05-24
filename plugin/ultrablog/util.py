@@ -358,7 +358,7 @@ def ub_get_blog_settings():
     '''Get the blog settings from vimrc and raise exception if none found
     '''
     class UBConfiguration:
-        homepage = 'http://0x3f.org/?p=1894'
+        homepage = 'http://0x3f.org/blog/ultrablog-as-an-ultimate-vim-blogging-plugin/'
 
         def __init__(self, rawSettings):
             self.loginName = rawSettings['login_name'].strip()
@@ -366,7 +366,9 @@ def ub_get_blog_settings():
             self.dbf = rawSettings['db'].strip()
             self.url = rawSettings['url'].strip()
             self.url = self.url.endswith('/') and self.url or self.url+'/'
-            self.xmlrpc = self.url+'xmlrpc.php'
+            self.uri = rawSettings['xmlrpc_uri'].strip()
+            self.uri = self.uri.startswith('/') and self.uri[1:] or self.uri
+            self.xmlrpc = self.url+self.uri
 
     if vim.eval('exists("ub_blog")') == '0':
         return None
