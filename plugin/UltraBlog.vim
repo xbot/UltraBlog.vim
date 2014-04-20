@@ -182,6 +182,41 @@ function! UBClearUndo()"{{{
     unlet old_undolevels
 endfunction"}}}
 
+function! Completable(findstart, base)"{{{
+    let line = getline('.')
+    if line !~ '^\$categories:\s*'
+        return -1
+    endif
+    if a:findstart
+        " locate the start of the word
+        let line = getline('.')
+        let start = col('.') - 1
+        while start > 0 && line[start - 1] =~ '\a'
+            let start -= 1
+        endwhile
+        return start
+    else
+        " find matching items
+python <<EOF
+if len(cfg.categories) == 0:
+    try:
+        cats = api.metaWeblog.getCategories('', cfg.loginName, cfg.password)
+        cfg.categories = '|'.join([cat['description'].encode(self.enc) for cat in cats])
+    except Exception, e:
+        vim.command("echoerr '%s'" % e)
+vim.command("let s:categories='%s'" % cfg.categories)
+EOF
+        let res = []
+        for m in split(s:categories,"|")
+            if m =~ '^' . a:base
+                call add(res, m)
+            endif
+        endfor
+        return res
+      endif
+endfun"}}}
+set completefunc=Completable
+
 " Commands
 command! -nargs=* -complete=customlist,UBListCmpl UBList exec('py ub_list_items(<f-args>)')
 command! -nargs=* -complete=customlist,UBNewCmpl UBNew exec('py ub_new_item(<f-args>)')
@@ -216,3 +251,4 @@ def __ub_on_buffer_enter():
         ub_refresh_current_view()
         ub_set_view_outdated('%', False)
 EOF
+

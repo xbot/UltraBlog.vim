@@ -194,6 +194,7 @@ All keymappings can be customized by setting some options, refer to
                 be saved to it before opened.
 <s-enter>     - Open the post/page under cursor in a new splitted window.
 <c-enter>     - Open the post/page under cursor in a new tab.
+<c-x><c-u>    - Auto-complete categories, only works on the category line.
 
 ==============================================================================
   Commands                                                 *UltraBlog_Commands*
@@ -377,12 +378,17 @@ ub_blog                                                               *ub_blog*
                     \'password':'pass2011',
                     \'url':'http://www.sample.com/',
                     \'xmlrpc_uri':'xmlrpc.php',
-                    \'db':'$VIM/UltraBlog.db'
+                    \'db':'$VIM/UltraBlog.db',
+                    \'categories': 'CAT1\|CAT2\|CAT3'
                     \}
     Keys:
         db
             Use any path string that can be expanded as a normal fullpath by
             the function 'expand()'.
+        categories
+            The value is a string of categories seperated by "|". This setting 
+            is optional, categories will be fetched from your blog when this
+            option is not set.
 
 ------------------------------------------------------------------------------
 
@@ -636,6 +642,11 @@ Or submit issues with Github's issues tracker:
 ==============================================================================
   History                                                   *UltraBlog_History*
 ==============================================================================
+
+3.6.1
+    * Feature: Add an option 'categories' in the initial settings, categories
+               will be fetched from the blog if this option is not set. Users
+               can auto-complete categories using <C-X><C-U>.
 
 3.6.0
     * Feature: Add new options |ub_viewer_width| and |ub_viewer_width|, which
