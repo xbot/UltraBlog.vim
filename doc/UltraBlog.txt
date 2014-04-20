@@ -4,7 +4,7 @@
 ==============================================================================
 
 Author:      Lenin Lee   lenin.lee at gmail dot com       *UltraBlog_Author*
-URL:         http://0x3f.org/?p=1894                      *UltraBlog_URL*
+URL:         http://0x3f.org                              *UltraBlog_URL*
 Description: Ultimate vim blogging plugin.                |UltraBlog_Motivation|
 Version:     3.6.0                                        |UltraBlog_History|
 License:     New BSD                                      |UltraBlog_License|
@@ -194,6 +194,7 @@ All keymappings can be customized by setting some options, refer to
                 be saved to it before opened.
 <s-enter>     - Open the post/page under cursor in a new splitted window.
 <c-enter>     - Open the post/page under cursor in a new tab.
+<c-x><c-u>    - Auto-complete categories, only works on the category line.
 
 ==============================================================================
   Commands                                                 *UltraBlog_Commands*
@@ -376,12 +377,18 @@ ub_blog                                                               *ub_blog*
         let ub_blog = {'login_name':'admin',
                     \'password':'pass2011',
                     \'url':'http://www.sample.com/',
-                    \'db':'$VIM/UltraBlog.db'
+                    \'xmlrpc_uri':'xmlrpc.php',
+                    \'db':'$VIM/UltraBlog.db',
+                    \'categories': 'CAT1\|CAT2\|CAT3'
                     \}
     Keys:
         db
             Use any path string that can be expanded as a normal fullpath by
             the function 'expand()'.
+        categories
+            The value is a string of categories seperated by "|". This setting 
+            is optional, categories will be fetched from your blog when this
+            option is not set.
 
 ------------------------------------------------------------------------------
 
@@ -636,11 +643,18 @@ Or submit issues with Github's issues tracker:
   History                                                   *UltraBlog_History*
 ==============================================================================
 
+3.6.1
+    * Feature: Add an option 'categories' in the initial settings, categories
+               will be fetched from the blog if this option is not set. Users
+               can auto-complete categories using <C-X><C-U>.
+
 3.6.0
     * Feature: Add new options |ub_viewer_width| and |ub_viewer_width|, which
                define the default width and height of the built-in web browser.
     * Change:  The default width of the built-in web browser is now changed to
                900px.
+    * Change:  Add an option 'xmlrpc_uri' in the initial settings, which make
+               it possible for users to set custom XMLRPC access point.
     * Bugfix:  Fix the overwriting to auto commands created by other plugins.
 
 3.5.0

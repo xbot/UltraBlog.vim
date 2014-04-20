@@ -805,7 +805,6 @@ class UBCmdNew(UBCommand):
     def _createNewPost(self):
         item = Post()
         metaData = item.getMetaDict()
-        metaData['categories'] = self.__getCategories()
         metaData['status'] = 'draft'
 
         ub_wise_open_view('post_edit')
@@ -856,10 +855,6 @@ class UBCmdNew(UBCommand):
         vim.command('setl nomodified')
         if self.itemType=='tmpl': vim.current.window.cursor = (3, len(vim.current.buffer[2])-1)
         else: vim.current.window.cursor = (4, len(vim.current.buffer[3])-1)
-
-    def __getCategories(self):
-        cats = api.metaWeblog.getCategories('', cfg.loginName, cfg.password)
-        return ', '.join([cat['description'].encode(self.enc) for cat in cats])
 
     def __appendPromotionLink(self):
         doit = ub_get_option('ub_append_promotion_link')

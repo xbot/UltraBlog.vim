@@ -366,7 +366,10 @@ def ub_get_blog_settings():
             self.dbf = rawSettings['db'].strip()
             self.url = rawSettings['url'].strip()
             self.url = self.url.endswith('/') and self.url or self.url+'/'
-            self.xmlrpc = self.url+'xmlrpc.php'
+            self.uri = rawSettings['xmlrpc_uri'].strip()
+            self.uri = self.uri.startswith('/') and self.uri[1:] or self.uri
+            self.xmlrpc = self.url+self.uri
+            self.categories = rawSettings.has_key('categories') and rawSettings['categories'].strip() or ''
 
     if vim.eval('exists("ub_blog")') == '0':
         return None
